@@ -1,0 +1,709 @@
+DIAGNOSTIC COMPLET ET CAHIER DES CHARGES DE CORRECTION Application
+financière HTML / JavaScript Document texte de passation destiné à une
+IA de développement
+
+NOTE METHODOLOGIQUE : Ce document reprend le diagnostic établi à partir
+de l’audit statique du fichier HTML fourni. Les numéros de ligne sont
+indicatifs. La syntaxe JavaScript extraite a été vérifiée sans erreur,
+mais les parcours n’ont pas tous été exécutés dans un navigateur. Les
+risques signalés doivent être confirmés par les tests décrits.
+
+DIAGNOSTIC COMPLET ET CAHIER DES CHARGES DE CORRECTION
+
+Application financière HTML / JavaScript
+
+Document de passation destiné à une IA chargée d’analyser, corriger et
+améliorer le code source.
+
+0. Instructions impératives pour l’IA qui recevra ce document
+
+Tu reçois ce document avec le fichier HTML original. Tu dois modifier le
+fichier source réel, pas simplement proposer des extraits théoriques.
+Commence par relire intégralement le HTML fourni : les numéros de ligne
+indiqués dans ce diagnostic sont des repères issus de la version auditée
+et peuvent avoir changé.
+
+Ne réécris pas toute l’application et ne remplace pas son interface par
+une maquette. Préserve les fonctionnalités existantes, le style visuel,
+les données et les parcours qui fonctionnent.
+
+Avant toute modification, crée une copie de sauvegarde du fichier
+original. Ne supprime aucune fonctionnalité sans justification et sans
+validation explicite.
+
+Inspecte les fonctions appelantes et appelées avant de modifier une
+fonction. Vérifie les noms de variables, les structures de données et
+les conventions réellement présentes dans le fichier.
+
+Ne colle pas aveuglément les exemples de code du diagnostic : ils
+indiquent le résultat recherché, mais doivent être adaptés au DOM, aux
+composants et au modèle de données réels.
+
+Préserve la compatibilité avec les données déjà enregistrées dans
+localStorage et avec les anciens fichiers JSON exportés. Toute évolution
+du schéma doit inclure une migration rétrocompatible.
+
+Ne transforme jamais une estimation financière en valeur certaine.
+Affiche les hypothèses, la date des données, les données manquantes et
+le niveau de fiabilité.
+
+Ne prétends pas qu’une fonctionnalité est testée si elle n’a pas été
+exécutée. Fournis les tests effectués, leurs résultats et les limites
+restantes.
+
+À la fin, livre le HTML corrigé complet, un résumé des changements, les
+éventuelles migrations, les tests réalisés et les problèmes non résolus.
+
+1. Présentation fonctionnelle de l’application
+
+L’application est un outil personnel de pilotage financier qui regroupe
+le suivi du patrimoine, les frais, la stratégie d’investissement, les
+objectifs et le budget. L’audit a identifié environ 124 déclarations de
+fonctions JavaScript nommées dans la version examinée.
+
+2. Diagnostic détaillé par module
+
+2.1 Patrimoine
+
+Repères dans le fichier audité : val()/agg() autour des lignes 1039–1059
+; relais autour de 1111–1172 ; historique autour de 1311–1333 ;
+affichage du patrimoine autour de 2181–2186 ; applyBuy() autour de 5841.
+
+2.2 Frais, fiscalité et dettes
+
+2.3 Stratégie d’investissement
+
+2.4 Objectifs financiers
+
+2.5 Budget et trésorerie
+
+3. Défauts transversaux prioritaires
+
+4. Redondances et rationalisation
+
+5. Correctifs de phase 1 : spécifications techniques
+
+5.1 Valorisation incomplète
+
+Zones à examiner : val(), agg(), vHome() ; repères d’origine
+approximatifs : lignes 1039–1059 et 2181–2186.
+
+Comportement requis : conserver le total des valeurs connues, exposer le
+nombre de positions non valorisées et afficher un avertissement près du
+total. Ne pas remplacer une valeur inconnue par zéro sans le signaler.
+Ne pas inventer de prix.
+
+Critères d’acceptation :
+
+Une position valorisée est incluse dans le total connu.
+
+Une position non valorisée est comptée dans un indicateur distinct.
+
+Le tableau de bord indique que le total est partiel.
+
+Les graphiques indiquent clairement leur dénominateur/périmètre.
+
+5.2 Frais de courtage
+
+Zones à examiner : ordOf(), sums(), enregistrement de ordFee lors de
+applyBuy() ; repères : lignes 1087–1095, 5831–5848.
+
+Comportement requis : frais de courtage cumulés visibles séparément des
+frais récurrents annuels. Éviter d’ajouter les mêmes frais à la fois au
+coût d’acquisition et à un agrégat de frais sans préciser les
+conventions.
+
+Critère : trois ordres avec 1 €, 2 € et 3 € de frais doivent produire 6
+€ de frais de courtage cumulés, sans gonfler les frais récurrents
+annuels.
+
+5.3 Type d’instrument à l’achat
+
+Zone : applyBuy() autour de la ligne 5841 ; inspecter aussi
+openAddBuyModal() et la création des ordres.
+
+Comportement requis : le type d’instrument doit être sélectionné ou
+déterminé à la planification, stocké dans l’ordre, puis propagé à la
+position. Les anciennes données sans type doivent être migrées
+prudemment et ne pas être arbitrairement classées ETF.
+
+Critère : achat d’une action, d’un ETF et d’un fonds crée trois
+positions avec les types correspondants.
+
+5.4 Revenus passifs réalisés vs estimés
+
+Zone : passiveCard(), autour des lignes 2000–2018.
+
+Comportement requis : séparer dividendes réellement encaissés sur la
+période observée et intérêts théoriques/estimés. Le total combiné peut
+exister, mais doit être explicitement nommé « total réalisé + estimé ».
+
+Critère : 500 € de dividendes encaissés et 1 000 € d’intérêts estimés
+doivent apparaître en deux lignes distinctes.
+
+5.5 Pouvoir d’achat réel
+
+Zone : vHome(), formule repérée autour des lignes 2181–2186.
+
+Formule cible : patrimoine réel en euros de référence = patrimoine
+nominal actuel / (indice des prix actuel / indice des prix à la date de
+référence). Le code actuel divise par 1 + taux d’inflation récent : cela
+ne constitue pas une correction historique du pouvoir d’achat.
+
+Si aucune série historique fiable d’indices n’est disponible, retirer ou
+renommer temporairement la tuile plutôt que de présenter une
+approximation comme un chiffre réel.
+
+Test numérique : patrimoine nominal 100 000 €, indice de référence 100,
+indice actuel 110 → environ 90 909,09 € en euros de référence.
+
+5.6 Validation numérique
+
+Zone : pf(), autour des lignes 867–870. Le parseFloat permissif peut
+accepter 12abc comme 12.
+
+Comportement requis : valider la chaîne entière, accepter les décimales
+françaises et anglaises prévues par l’interface, refuser les caractères
+parasites, les séparateurs multiples et les valeurs non finies. Vérifier
+tous les appels à pf() avant de changer son contrat de retour.
+
+Tests : 1200 et 1200,50 acceptés ; 12abc, 1,2,3 et chaîne vide refusés.
+Ne pas casser les champs optionnels : leur valeur vide doit être gérée
+explicitement par chaque formulaire.
+
+5.7 Sauvegarde locale
+
+Zones : ls.get(), ls.set(), save(), autour des lignes 887–895.
+
+Comportement requis : ne pas masquer les erreurs d’écriture ; retourner
+un statut ; exposer un état de sauvegarde compréhensible ; ne pas
+prétendre qu’une donnée est persistée si localStorage a échoué.
+
+Attention : ne pas afficher un message intrusif à chaque écriture.
+Centraliser le statut et le mettre à jour à la suite d’une action
+utilisateur.
+
+Tests : stockage indisponible, quota dépassé, données corrompues,
+rechargement après sauvegarde.
+
+5.8 Taux économiques
+
+Zone : constante LIVRET_RATE autour des lignes 1987–1996.
+
+Comportement requis : taux paramétrable, source et date d’effet
+visibles, date de dernière mise à jour, distinction entre valeur par
+défaut et valeur personnalisée. Ne pas coder durablement un taux
+réglementaire sans date de validité.
+
+Toute migration doit préserver les taux déjà saisis par l’utilisateur.
+
+6. Sauvegarde, import/export et compatibilité des données
+
+Avant modification, identifier la clé localStorage utilisée, la
+structure complète de S et toutes les versions d’export JSON.
+
+Créer une fonction de validation de schéma pour les objets importés :
+types, champs obligatoires, tableaux, identifiants et références
+croisées.
+
+Ne pas remplacer l’état courant avant que l’import soit intégralement
+validé.
+
+Prévoir une sauvegarde de l’état courant et un mécanisme de retour
+arrière si l’import échoue.
+
+Ajouter un numéro de version au format d’export et une migration
+explicite entre versions.
+
+Tester les anciennes données réelles, les données partielles, les
+valeurs nulles, les doublons d’identifiants et les champs inconnus.
+
+Ne pas supprimer les champs inconnus sans stratégie documentée : ils
+peuvent provenir d’une version plus récente.
+
+7. Campagne de tests fonctionnels et non-régression
+
+8. Architecture cible recommandée
+
+Conserver les cinq domaines de navigation, mais partager les services
+métiers et les données :
+
+Patrimoine : actifs, enveloppes, positions, immobilier, dettes, revenus
+patrimoniaux et historique.
+
+Budget : revenus, dépenses, abonnements, provisions, trésorerie et
+capacité d’épargne.
+
+Stratégie : allocation cible, plan annuel, achats, ordres exécutés et
+rééquilibrage.
+
+Objectifs : projets, échéances, financement, effort mensuel et
+indépendance financière.
+
+Simulations et analyses : frais, fiscalité indicative, intérêts
+composés, immobilier, scénarios et risques.
+
+Services communs : calculs financiers, taux/inflation, cours de marché,
+sauvegarde, import/export, paramètres et journal d’erreurs.
+
+Principe central : une donnée métier ne doit avoir qu’une seule source
+de vérité. Les différents écrans peuvent la présenter sous plusieurs
+angles, mais ne doivent pas recalculer chacun leur propre version du
+patrimoine, des frais, des dividendes ou de la trésorerie.
+
+9. Améliorations de l’expérience utilisateur
+
+Tableau de bord : patrimoine net, actifs bruts, dettes, variation sur 12
+mois, répartition et alertes de qualité des données.
+
+Détail d’enveloppe : solde, capital investi, performance, frais,
+fiscalité indicative, historique, positions, dividendes et objectifs
+liés.
+
+Formulaires : validation immédiate, unités explicites, exemples, valeurs
+par défaut prudentes et récapitulatif avant confirmation.
+
+Indicateurs : distinguer systématiquement réalisé, estimé, projeté et
+incomplet.
+
+Navigation : garder les accès rapides contextuels tout en réutilisant
+les mêmes formulaires et règles métier.
+
+États système : afficher chargement, absence de données, données
+anciennes, erreur de réseau et échec de sauvegarde.
+
+Accessibilité : autoriser le zoom, labels explicites, navigation
+clavier, gestion du focus et contrastes suffisants.
+
+Simulations : permettre plusieurs scénarios comparables et rendre toutes
+les hypothèses modifiables et visibles.
+
+10. Feuille de route
+
+11. Livrables obligatoires de l’IA développeuse
+
+Le fichier HTML complet modifié, prêt à être ouvert et utilisé.
+
+Une copie du fichier original ou une procédure claire de retour arrière.
+
+Un changelog précis : fonction modifiée, raison, effet attendu.
+
+Une liste des changements de schéma et migrations de données.
+
+Les résultats des contrôles syntaxiques et des tests réellement
+exécutés.
+
+Une liste des tests non exécutés et des risques encore ouverts.
+
+Aucune dépendance externe nouvelle sans justification et sans solution
+de repli.
+
+Aucune suppression de données ou fonctionnalité existante sans accord
+explicite.
+
+12. Références de code issues de l’audit initial
+
+13. Prompt prêt à copier-coller pour l’IA
+
+Tu es un développeur senior spécialisé en applications financières
+HTML/CSS/JavaScript. Je te fournis le fichier HTML de mon application et
+un document de diagnostic/cahier des charges. Ta mission est de modifier
+le fichier HTML réel en suivant ce document.
+
+RÈGLES : 1. Lis intégralement le HTML avant de modifier quoi que ce
+soit. 2. Fais une copie de sauvegarde du fichier d’origine. 3. Ne
+réécris pas l’application entière. Préserve son interface, ses
+fonctionnalités et ses données existantes. 4. Vérifie les appels, les
+structures de données et les dépendances avant chaque changement. Les
+numéros de ligne du diagnostic sont indicatifs. 5. Applique d’abord la
+phase 1 dans l’ordre : valorisations manquantes ; frais de courtage ;
+type réel des instruments ; revenus réalisés/estimés ; pouvoir d’achat
+réel ; validation numérique ; erreurs de sauvegarde ; taux économiques
+datés. 6. Préserve la compatibilité des données localStorage et des
+exports JSON existants. Toute évolution doit comporter une migration,
+une validation, une sauvegarde préalable et un rollback. 7. Ne présente
+jamais une estimation comme une certitude. N’invente aucune donnée de
+marché ou donnée utilisateur. 8. Ajoute ou exécute les tests décrits
+dans le cahier des charges. Effectue au minimum une vérification
+syntaxique du JavaScript et, si l’environnement le permet, des tests
+navigateur des parcours concernés. 9. Corrige les défauts sans
+introduire de doublons, de double comptabilisation ni de régression.
+
+LIVRABLES : - le fichier HTML complet corrigé ; - un changelog des
+fonctions et zones modifiées ; - les migrations de données effectuées
+; - les tests exécutés avec résultats ; - les tests non exécutés et les
+limites restantes.
+
+Si une correction exige une décision métier ou une information absente
+du code, ne l’invente pas : explique le blocage et propose l’option la
+plus sûre. Commence par analyser le fichier et établir le plan de
+modifications exact, puis applique les corrections.
+
+Fin du document
+
+[TABLEAU 1]
+
+Élément | Information
+
+Fichier source audité | test 30:10.html
+
+Nature de l’audit | Analyse statique du HTML, CSS et JavaScript, avec
+inspection de fonctions et de flux de données.
+
+Contrôle syntaxique | La vérification syntaxique du JavaScript extrait a
+réussi (aucune erreur de syntaxe détectée).
+
+Limite importante | Aucun test exhaustif dans un navigateur, aucune
+connexion réelle aux services externes et aucun test sur un jeu de
+données complet n’ont été réalisés.
+
+Objectif de ce document | Fournir à une IA un diagnostic structuré, les
+zones de code à examiner, les corrections attendues, les critères
+d’acceptation et les précautions de migration.
+
+[TABLEAU 2]
+
+Domaine | Fonctionnalités recensées
+
+Patrimoine | Tableau de bord ; patrimoine brut/net ; dettes ; fiscalité
+estimative ; pouvoir d’achat ; répartition par classes ; comptes et
+enveloppes ; positions ; actifs manuels ; cours de marché ; recherche
+ISIN/ticker ; dividendes ; performances et historique.
+
+Frais | Frais de gestion ; frais de fonds/ETF ; frais d’enveloppes ;
+fiscalité estimative ; crédits immobiliers et crédits à la
+consommation/automobiles ; échéanciers ; projections de frais.
+
+Stratégie | Planification annuelle et mensuelle ; achats programmés ;
+exécution d’ordres ; provisions ; gestion des années.
+
+Objectifs | Objectifs financiers ; montant cible ; date ; enveloppes
+associées ; allocation ; financement ; effort mensuel ; indépendance
+financière/FIRE.
+
+Budget | Revenus ; dépenses fixes/variables ; logement ; abonnements ;
+dépenses annuelles ; provisions ; trésorerie ; flux ; graphiques ;
+intérêts composés ; simulateur location/achat.
+
+Socle technique | HTML/CSS/JavaScript ; stockage local ; import/export
+JSON ; relais Google Apps Script ; Yahoo Finance ; conversion de devises
+; données d’inflation Eurostat ; interface responsive et thème.
+
+[TABLEAU 3]
+
+Fonctionnalité | Diagnostic / risque | Correction attendue et test
+
+Vue d’ensemble | Le total peut exclure les positions sans cours ; le
+caractère incomplet n’est pas assez évident. | Afficher total des
+valeurs connues, nombre de lignes non valorisées et avertissement
+permanent. Tester une position avec cours et une sans cours.
+
+Répartition par classe | Les valeurs manquantes peuvent fausser les
+pourcentages et donner une impression de couverture complète. | Afficher
+le périmètre du calcul et les positions exclues. Vérifier que les parts
+totalisent 100 % sur le périmètre connu.
+
+Enveloppes et comptes | Plusieurs accès permettent de gérer des éléments
+proches, avec risque de formulaires et règles divergents. | Conserver
+les raccourcis contextuels mais centraliser validation, création,
+modification et suppression.
+
+Positions et instruments | Lors d’un achat, applyBuy() crée une ligne
+avec kind: ‘ETF’ même si le support n’est pas un ETF. | Transmettre et
+persister le type réel de l’instrument depuis la planification jusqu’à
+la position créée. Tester action, ETF, fonds et crypto si ces catégories
+sont supportées.
+
+Cours de marché | Le statut du relais peut être déduit de sa
+configuration plutôt que d’un échange réussi. | Distinguer non
+configuré, test en cours, connecté, erreur et dernière actualisation
+réussie. Tester URL invalide, serveur indisponible, délai dépassé et
+réponse invalide.
+
+Dividendes | Les données apparaissent dans plusieurs vues, ce qui est
+utile mais peut créer doublons ou divergences. | Une seule source de
+vérité pour les dividendes ; vues synthétiques et détaillées basées sur
+le même registre. Tester absence de double comptabilisation.
+
+Historique | L’enregistrement est déclenché à l’ouverture de la vue, pas
+nécessairement chaque jour en arrière-plan. | Indiquer la fréquence
+réelle et les dates observées ; ne pas inventer de points historiques.
+Tester plusieurs ouvertures et jours distincts.
+
+[TABLEAU 4]
+
+Fonctionnalité | Diagnostic / risque | Correction attendue et test
+
+Frais de courtage | ordFee est enregistré et ordOf() est appelé dans
+sums(), mais son total semble peu ou pas exploité dans les indicateurs.
+| Afficher les frais de courtage cumulés séparément des frais
+récurrents. Vérifier les achats, modifications, annulations et absence
+de double comptage.
+
+Frais fonds/ETF/enveloppes | Risque de mélanger frais récurrents, frais
+ponctuels, frais du support et frais d’enveloppe. | Ventiler chaque
+famille et afficher un coût annuel estimé ainsi qu’un cumul historique.
+Tester plusieurs supports et enveloppes.
+
+Fiscalité | Le calcul observé est simplifié : gains positifs agrégés
+multipliés par un taux fourni. Il ne couvre pas nécessairement toutes
+les règles applicables. | Étiqueter comme estimation indicative,
+afficher les hypothèses, ne pas présenter comme conseil ou montant
+fiscal définitif. Tester gains positifs/négatifs et enveloppes
+distinctes.
+
+Crédits et dettes | Gestion potentiellement dispersée entre modules. |
+Modèle commun de dette : capital initial/restant, taux, durée,
+mensualité, assurance, échéancier et remboursement anticipé. Comparer
+les échéances à un calcul manuel.
+
+Projection des frais | Les frais de courtage peuvent ne pas entrer dans
+les coûts globaux. | Centraliser les agrégations et préciser les frais
+inclus dans chaque projection.
+
+[TABLEAU 5]
+
+Fonctionnalité | Diagnostic / risque | Correction attendue et test
+
+Planificateur annuel | Les montants planifiés peuvent ne pas être
+confrontés à la capacité d’épargne issue du budget. | Calculer la
+capacité disponible après dépenses et provisions ; alerter si les
+engagements la dépassent.
+
+Achats programmés | Le type d’instrument n’est pas correctement propagé
+jusqu’à la position créée. | Ajouter un champ type au modèle d’ordre et
+le conserver à l’exécution.
+
+Provisions | Une somme réservée pourrait être considérée comme
+disponible pour investir. | Distinguer liquidités totales, sommes
+réservées et liquidités investissables.
+
+Gestion des années | Les reports et opérations non exécutées doivent
+être traités sans mélange de périodes. | Définir les règles de clôture,
+report et archivage ; tester changement d’année.
+
+[TABLEAU 6]
+
+Fonctionnalité | Diagnostic / risque | Correction attendue et test
+
+Création d’objectif | La faisabilité et l’effort mensuel ne sont pas
+nécessairement assez explicites. | Afficher cible, déjà financé,
+restant, échéance, effort mensuel et hypothèses.
+
+Enveloppes liées | Les soldes semblent affectés aux objectifs par ordre
+de date, sans allocation partielle explicitement définie. | Permettre un
+montant ou pourcentage affecté par objectif ; empêcher toute double
+affectation d’un même euro.
+
+Financement | Actifs détenus, apports futurs, achats planifiés et
+provisions doivent être distingués. | Présenter séparément capital
+existant, apports futurs, ressources réservées et besoin restant.
+
+FIRE | Résultat très dépendant des hypothèses de rendement, inflation et
+taux de retrait. | Afficher hypothèses et scénarios prudent, central et
+favorable ; tester sensibilité.
+
+[TABLEAU 7]
+
+Fonctionnalité | Diagnostic / risque | Correction attendue et test
+
+Revenus | Risque de confusion entre revenus budgétaires, dividendes
+encaissés et intérêts estimés. | Distinguer revenus réguliers,
+exceptionnels, réalisés et prévisionnels.
+
+Dépenses | Catégories et fréquences doivent être cohérentes entre les
+vues. | Centraliser les catégories et règles de périodicité ; tester
+création/modification/suppression.
+
+Abonnements | Risque de double comptabilisation mensuelle et annuelle. |
+Stocker fréquence et prochaine échéance ; convertir en équivalent
+mensuel/annuel sans doublon.
+
+Provisions | Une provision n’est pas une dépense déjà payée. | Afficher
+cible, constitué, payé et solde à financer séparément.
+
+Trésorerie | Le reste à vivre doit tenir compte des provisions et
+investissements programmés. | Créer une formule de capacité d’épargne
+partagée avec le planificateur.
+
+Graphiques | Périmètre et unités peuvent ne pas être immédiatement
+compréhensibles. | Afficher période, unité, périmètre et valeurs sources
+; comparer graphiques et données.
+
+Location/achat | Simulation déterministe pouvant masquer la sensibilité
+aux hypothèses. | Ajouter scénarios de taux, durée, travaux, charges,
+prix, loyers et revente.
+
+[TABLEAU 8]
+
+Priorité | Point | Impact / traitement
+
+Critique | Valorisations manquantes insuffisamment visibles | Risque
+d’interprétation erronée du patrimoine. Afficher le périmètre et les
+absences près du total.
+
+Critique | Import JSON insuffisamment sécurisé | Risque de perte de
+données. Validation de schéma, aperçu, confirmation, sauvegarde
+préalable et rollback.
+
+Haute | Frais de courtage non repris dans certains agrégats |
+Sous-estimation du coût d’investissement. Centraliser et ventiler.
+
+Haute | Fiscalité simplifiée | Risque de fausse précision. Afficher
+hypothèses et limites.
+
+Haute | Budget et stratégie insuffisamment reliés | Risque d’engagements
+supérieurs à la trésorerie. Calcul partagé de capacité d’investissement.
+
+Haute | Pouvoir d’achat réel calculé avec un taux annuel isolé | Mesure
+temporelle invalide ou trompeuse. Utiliser deux indices à deux dates ou
+retirer temporairement l’indicateur.
+
+Moyenne | Revenus réalisés et estimés mélangés | Risque de
+surestimation. Séparer les deux montants.
+
+Moyenne | Historique déclenché à l’ouverture | Historique irrégulier.
+Expliquer la fréquence et les lacunes.
+
+Moyenne | Parseur numérique basé sur parseFloat | Accepte des chaînes
+partiellement invalides comme 12abc. Valider strictement.
+
+Moyenne | CSS redéfini à plusieurs endroits | Risque de régression et
+maintenance difficile. Dédupliquer et organiser par composants.
+
+Moyenne | Zoom utilisateur désactivé | Accessibilité mobile réduite.
+Autoriser le zoom et éviter les restrictions tactiles globales.
+
+À vérifier | Modales et navigation clavier | Vérifier focus initial,
+piège de focus, fermeture Échap, restitution du focus et attributs ARIA.
+
+[TABLEAU 9]
+
+Éléments proches | Risque | Décision recommandée
+
+Patrimoine net affiché dans plusieurs vues | Périmètres ou formules
+divergents. | Une fonction métier centrale ; plusieurs rendus UI.
+
+Dividendes dans dashboard, revenus, calendrier et détail des titres |
+Doublons ou totaux divergents. | Un registre unique, des vues filtrées.
+
+Revenus passifs et dividendes | Confusion entre réalisé et estimé. |
+Module revenus séparant encaissé, estimé et projeté.
+
+Dettes dans plusieurs écrans | Échéanciers et soldes incohérents. |
+Gestionnaire commun de dettes.
+
+Simulations de frais et intérêts composés | Entrées et résultats
+dispersés. | Espace simulations, avec sous-modules dédiés.
+
+Ajout d’enveloppes/positions par plusieurs chemins | Formulaires
+divergents. | Conserver les raccourcis mais partager les mêmes
+composants et validations.
+
+Règles CSS redondantes | Cascade difficile à maintenir. | Tokens et
+styles par composants ; suppression des règles mortes après
+vérification.
+
+[TABLEAU 10]
+
+Module | Scénario et résultat attendu
+
+Patrimoine | Créer une position avec cours et une sans cours ; le total
+partiel et l’avertissement doivent être cohérents.
+
+Répartition | Vérifier que les pourcentages utilisent un périmètre
+explicite et ne cachent pas les positions exclues.
+
+Ordres | Acheter une action, un ETF et un fonds ; vérifier type,
+quantité, prix, enveloppe et frais.
+
+Frais | Passer trois ordres à 1 €, 2 € et 3 € ; vérifier le cumul de 6 €
+et la séparation des frais récurrents.
+
+Dividendes | Ajouter un dividende ; contrôler qu’il apparaît dans les
+vues attendues sans double comptage.
+
+Revenus | Comparer revenus encaissés et intérêts estimés ; ne pas les
+confondre.
+
+Dettes | Créer une dette et vérifier capital restant, intérêts et
+échéancier par calcul manuel.
+
+Budget | Saisir revenus, dépenses et abonnements ; vérifier la
+conversion des périodicités et le reste à vivre.
+
+Provisions | Constituer une provision puis payer la facture ; vérifier
+que la somme n’est pas déduite deux fois.
+
+Stratégie | Programmer des achats supérieurs à la capacité d’épargne ;
+une alerte doit apparaître.
+
+Objectifs | Affecter une enveloppe à deux objectifs ; interdire le
+double comptage du capital.
+
+Inflation | Comparer indices 100 et 110 avec 100 000 € nominaux ;
+résultat attendu environ 90 909,09 € en euros de référence.
+
+Saisie | Tester nombres valides, virgule, point, chaînes parasites,
+champs vides et valeurs négatives.
+
+Sauvegarde | Simuler quota dépassé ou localStorage indisponible ;
+afficher un état d’échec.
+
+Import/export | Exporter puis réimporter ; tester JSON invalide et
+ancienne version sans perte de l’état courant.
+
+Responsive | Tester mobile, tablette et desktop ; zoom navigateur,
+tableaux, modales et graphiques.
+
+Accessibilité | Navigation clavier, focus des modales, fermeture Échap,
+labels, contrastes et zoom.
+
+[TABLEAU 11]
+
+Phase | Contenu | Condition de sortie
+
+1 — Fiabilité | Valorisations manquantes, frais de courtage, type des
+instruments, revenus réalisés/estimés, inflation, parsing et sauvegarde.
+| Tests financiers et de persistance réussis ; aucune régression sur les
+données existantes.
+
+2 — Cohérence | Modèle de données partagé, budget/stratégie, dettes
+communes, allocations partielles des objectifs. | Un même montant est
+identique dans tous les modules et n’est jamais compté deux fois.
+
+3 — UX | Tableau de bord, formulaires, états d’erreur, accessibilité et
+responsive. | Parcours clés réalisables sans ambiguïté sur mobile et
+desktop.
+
+4 — Avancé | Risques, scénarios, FIRE, rapports exportables. |
+Hypothèses documentées, scénarios reproductibles et résultats
+explicables.
+
+[TABLEAU 12]
+
+Zone / fonction | Repère de ligne approximatif | Sujet
+
+pf() | 867–870 | Conversion et validation numérique.
+
+ls.get(), ls.set(), save() | 887–895 | Stockage local et erreurs de
+sauvegarde.
+
+val(), agg() | 1039–1059 | Valorisations et positions non valorisées.
+
+ordOf(), sums() | 1087–1095 | Frais de courtage et agrégations.
+
+Relais / statut | 1111–1172 | Connexion et état du service externe.
+
+Historique | 1311–1333 | Enregistrement à l’ouverture.
+
+LIVRET_RATE | 1987–1996 | Taux de livret codé en dur.
+
+passiveCard() | 2000–2018 | Revenus réels et estimés.
+
+vHome() | 2181–2186 | Patrimoine net et correction inflation.
+
+Affectation objectifs | 3930–3950 | Allocation des enveloppes aux
+objectifs.
+
+applyBuy() | 5831–5848 | Exécution d’achat et création de position.
