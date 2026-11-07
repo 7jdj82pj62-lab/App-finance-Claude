@@ -1,26 +1,27 @@
-# Budget — appli finance simple pour iPhone
+# Budget — mes finances, simplement, sur iPhone
 
-Une seule question : **combien me reste-t-il ce mois-ci ?**
+Une appli web épurée en 4 onglets :
 
-- Un gros chiffre : ce qu'il reste (entrées − sorties)
-- « Où va l'argent » : répartition des dépenses par catégorie
-- La liste des mouvements (touchez une ligne pour la modifier ou la supprimer)
-- Un seul bouton **+** pour ajouter une dépense ou un revenu
+- **Patrimoine** : le total de ce que vous possédez moins ce que vous devez, la répartition (épargne, bourse, crypto, immobilier) et vos comptes. Livrets, assurance vie et immobilier se saisissent à la main ; PEA, compte-titres et cryptos contiennent des lignes (action, ETF, crypto) dont le cours s'actualise tout seul grâce au relais Google.
+- **Budget** : ce qu'il reste ce mois-ci, où va l'argent, la liste des mouvements, et les charges annuelles (taxe foncière…) divisées par 12 pour savoir combien mettre de côté.
+- **Objectifs** : un montant, une date, et combien épargner par mois. Un objectif peut suivre un compte (ex. Livret A).
+- **Outils** : vos crédits (mensualité, reste à rembourser, déduit du patrimoine) et trois simulateurs : intérêts composés, louer ou acheter, mensualité de crédit.
 
-Aucune inscription, aucun serveur : les données restent sur le téléphone (stockage local du navigateur). Fonctionne hors connexion et suit le mode sombre de l'iPhone.
+Aucune inscription : les données restent sur le téléphone. Réglages → Exporter pour faire une sauvegarde.
+
+## Cours en direct (facultatif)
+
+Le fichier `relais-google.gs` est un petit script Google gratuit qui récupère les cours (Yahoo Finance) et permet de chercher un titre par ISIN ou par nom. Le mode d'emploi est dans l'appli : Patrimoine → ⚙︎ Réglages.
 
 ## Installer sur l'iPhone
 
-1. Héberger le dossier (ex. GitHub Pages : Settings → Pages → branche `main`, dossier racine).
+1. Publier le dossier (GitHub Pages : Settings → Pages).
 2. Ouvrir l'adresse dans **Safari**.
-3. Bouton **Partager** → **Sur l'écran d'accueil**.
-
-L'appli s'ouvre alors en plein écran, comme une app native.
-
-> Les données sont liées à Safari sur cet appareil : effacer les données de navigation les supprime.
+3. **Partager** → **Sur l'écran d'accueil**.
 
 ## Fichiers
 
-- `index.html` — toute l'appli (HTML, CSS, JS)
-- `manifest.webmanifest`, `icon*.png`, `icon.svg` — installation sur l'écran d'accueil
+- `index.html` — toute l'appli
+- `relais-google.gs` — script du relais de cotations (à coller dans Google Apps Script)
 - `sw.js` — fonctionnement hors connexion
+- `manifest.webmanifest`, `icon*` — installation sur l'écran d'accueil
