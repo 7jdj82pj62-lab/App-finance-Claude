@@ -9,7 +9,7 @@
 | `original/diagnostic.txt` | Diagnostic fourni. |
 | `tests/parcours-accueil.e2e.js` | Test navigateur (Playwright) du parcours complet + non-régression des vues. |
 
-Toutes les fonctions d'origine sont conservées (124 → 124, seules des fonctions `wz*`, `openWizard` et `closeWizard` sont ajoutées). Le « Questionnaire express » d'origine reste accessible depuis le bouton **Ajouter**.
+Les 122 fonctions de premier niveau d'origine sont toutes conservées ; 16 fonctions sont ajoutées (`wz*`, `openWizard`, `closeWizard`). Le « Questionnaire express » d'origine reste accessible depuis le bouton **Ajouter**.
 
 ## Le parcours
 
