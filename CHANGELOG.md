@@ -1,3 +1,12 @@
+# Journal des modifications
+
+## Point de départ de la refonte (14/11/2026)
+`index.html` est remplacé par la version la plus récente de l'appli (« Claude_code_20 », versions 2 à 18 du journal tenu hors dépôt). C'est la base de la refonte : on garde les données, les calculs et le questionnaire de départ, et on reconstruit l'interface qui suit le questionnaire.
+
+Attention : `tests/parcours-accueil.e2e.js` date de la version 1. Les tests de la version 18 (170/170) ne sont pas dans le dépôt.
+
+---
+
 # Parcours d'accueil guidé — journal des modifications
 
 ## Fichiers
