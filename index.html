@@ -1306,6 +1306,12 @@ button, a, label, .row-item, .wz-choice, .wz-chip, .chip-btn, .btn, .onb-tile { 
 .n-kv span { color: var(--muted); }
 .n-kv b { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); }
 .n-kv b.n-neg { color: var(--down); }
+.n-kv b .n-pos { color: var(--up); } .n-kv b .n-neg { color: var(--down); }
+.n-row-go { color: var(--muted-light); flex: none; display: flex; }
+.n-card > .n-kv:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.n-kv > .n-eq { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
+.n-kv > .n-eq span { color: var(--ink); font-weight: 600; }
+.n-kv > .n-eq b { font-size: 17px; font-weight: 700; }
 .n-pos { color: var(--up); font-weight: 600; } .n-neg { color: var(--down); font-weight: 600; }
 .n-card { display: block; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 16px; margin-top: 12px; text-align: left; font: inherit; color: inherit; }
 button.n-card { cursor: pointer; }
@@ -8506,7 +8512,8 @@ function nRow(o) {
   return h(o.onclick ? 'button' : 'div', { class: 'n-row', onclick: o.onclick || null },
     o.lead || null,
     h('div', { class: 'n-tt' }, h('b', null, o.t), o.s ? h('span', null, o.s) : null, o.tip ? h('span', { class: 'n-tip' }, o.tip) : null),
-    o.v != null || o.vs ? h('div', { class: 'n-val' }, o.v != null ? h('b', { style: o.vc ? `color: ${o.vc};` : null }, o.v) : null, o.vs || null) : null);
+    o.v != null || o.vs ? h('div', { class: 'n-val' }, o.v != null ? h('b', { style: o.vc ? `color: ${o.vc};` : null }, o.v) : null, o.vs || null)
+      : o.onclick ? h('span', { class: 'n-row-go' }, getIcon('chevron-right', 16)) : null);
 }
 const nDetail = (t, s, href) => h('button', { class: 'n-detail', onclick: () => go(href) }, h('div', { class: 'n-tt' }, h('b', null, t), h('span', null, s)), getIcon('chevron-right', 16));
 const nBack = (href, label) => h('button', { class: 'n-back', onclick: () => go(href) }, getIcon('chevron-left', 15), label);
@@ -8915,37 +8922,142 @@ function vHealth() {
 }
 
 /* ---------- MON ARGENT ---------- */
+// Tous les crédits : ceux rattachés à un bien et les crédits seuls (auto, conso…)
+function creditsAll() {
+  const out = [];
+  propertyLines().filter(({ l }) => l.loan && l.loan.amt > 0).forEach(({ e, l }) => out.push({ id: e.id + '/' + l.id, name: 'Crédit immobilier', sub: l.name, L: l.loan, edit: () => openLoanModal(e, l) }));
+  loansList().filter(d => d.amt > 0).forEach(d => out.push({ id: d.id, name: d.name || 'Crédit', sub: null, L: d, edit: () => openDebtEditor(d) }));
+  return out.map(x => Object.assign(x, { c: loanCalc(x.L) }));
+}
+const gapCol = d => Math.abs(d) < 3 ? 'var(--up)' : d < 0 ? 'var(--down)' : 'var(--warn)';
+function renameModal(obj, label) {
+  const root = $('#modal-root'), close = () => { root.innerHTML = ''; };
+  const inp = h('input', { type: 'text', value: obj.name });
+  const ok = () => { const v = inp.value.trim(); if (v) { obj.name = v; save(); render(); } close(); };
+  inp.onkeydown = ev => { if (ev.key === 'Enter') ok(); };
+  const modal = h('div', { class: 'modal-overlay', onclick: ev => { if (ev.target === modal) close(); } },
+    h('div', { class: 'modal-sheet', style: 'max-width: 420px;' },
+      h('div', { class: 'modal-header' }, h('div', { class: 'modal-title' }, 'Renommer'), h('button', { class: 'btn-icon-only', onclick: close }, getIcon('x', 16))),
+      h('div', { class: 'modal-body' }, h('div', { class: 'form-group' }, h('label', { class: 'form-label' }, label), inp)),
+      h('div', { class: 'modal-footer' }, h('button', { class: 'btn btn-secondary', onclick: close }, 'Annuler'), h('button', { class: 'btn btn-primary', onclick: ok }, 'Enregistrer'))));
+  root.replaceChildren(modal);
+  setTimeout(() => inp.focus(), 50);
+}
+
 function vMoney() {
   const K = keyFigures(), a = K.a, T = S.target || {};
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nHead('Qu’est-ce que j’ai ?', 'Mon argent'));
-  box.append(nCard(nKick('Patrimoine net'), h('div', { class: 'n-big num' }, nE(K.net)),
-    h('div', { class: 'n-kv' },
-      h('div', null, h('span', null, 'Biens'), h('b', { class: 'num' }, nE(a.v))),
-      K.debt > 0 ? h('div', null, h('span', null, 'Crédits'), h('b', { class: 'num n-neg' }, '− ' + nE(K.debt))) : null,
-      K.sm.t > 0 ? h('div', null, h('span', null, 'Impôts à venir'), h('b', { class: 'num n-neg' }, '− ' + nE(K.sm.t))) : null)));
-  const cs = CLASSES.map(c => ({ c, v: agg(classEnvs(c).flatMap(e => e.lines)).v })).filter(o => o.v > 0);
-  if (a.v > 0) {
-    box.append(nWh('Répartition', null, 'Par classe'));
-    const d = h('div', { class: 'n-card n-donut' }, svgEl(donutH(cs.map(o => [o.v, KCOL[o.c]]), 120)),
-      h('div', { class: 'n-leg' }, ...cs.map(o => h('button', { onclick: () => go('#/c/' + CLASSES.indexOf(o.c)) }, h('i', { style: `background: ${KCOL[o.c]};` }), o.c, h('b', null, P0.format(o.v / a.v)), getIcon('chevron-right', 13)))));
-    box.append(d);
-    const hasT = CLASSES.some(c => T[c] != null);
-    box.append(nWh('Votre répartition visée', null, hasT ? 'Modifier' : 'Définir', () => go('#/a/t')));
-    if (hasT) {
-      const rows = CLASSES.filter(c => T[c] != null || cs.some(o => o.c === c)).map(c => { const w = (cs.find(o => o.c === c) || { v: 0 }).v / a.v * 100, t = T[c] || 0; return { c, w, t, d: Math.round(w - t) }; });
-      const need = rows.slice().sort((x, y) => x.d - y.d)[0];
-      box.append(nCard(h('div', { class: 'n-alloc' }, ...rows.map(r => { const el = h('div', { class: 'n-a' }); el.innerHTML = `<span>${escH(r.c)}</span><span class="n-t"><i style="width:${Math.min(100, r.w).toFixed(1)}%;background:${KCOL[r.c]}"></i><u style="left:${Math.min(100, r.t)}%"></u></span><span class="n-r"><b style="color:${Math.abs(r.d) < 3 ? 'var(--up)' : r.d < 0 ? 'var(--down)' : 'var(--warn)'}">${Math.round(r.w)} %</b><small>visé ${Math.round(r.t)} %</small></span>`; return el; })),
-        nSub('Barre = aujourd’hui · trait noir = votre objectif. En vert : proche de l’objectif, en rouge : pas assez, en orange : trop.'),
-        need && need.d <= -3 ? h('div', { class: 'n-buy' }, '👉 Vos prochains achats vont ', h('b', null, `en priorité sur ${need.c === 'Épargne' ? 'l’épargne' : need.c === 'Immobilier' ? 'l’immobilier' : 'la ' + need.c}`), ' pour vous rapprocher de votre objectif.') : null,
-        nMore(sheetAlloc)));
-    } else box.append(nTight(nRow({ t: 'Fixez la répartition qui vous ressemble', s: 'Par exemple 40 % Bourse, 15 % Épargne… snowball vous dira où placer vos prochains achats.', onclick: () => go('#/a/t'), vs: h('span', { class: 'n-pill' }, 'Définir') })));
+  if (!S.envs.length) {
+    box.append(h('div', { class: 'n-callout' }, 'Ajoutez votre premier compte : livret, PEA, assurance vie, bien immobilier…'), h('button', { class: 'n-detail-btn', onclick: () => openAddMenu() }, 'Ajouter un compte'));
+    return box;
   }
+  // 1. Le calcul en une ligne
+  const eq = (k, v, cls) => h('div', null, h('span', null, k), h('b', { class: 'num' + (cls ? ' ' + cls : '') }, v));
+  box.append(nCard(h('div', { class: 'n-kv' },
+    eq('Ce que vous avez', nE(a.v)),
+    K.debt > 0 ? eq('Crédits restant dus', '− ' + nE(K.debt), 'n-neg') : null,
+    K.sm.t > 0 ? eq('Impôts si vous vendiez', '− ' + nE(K.sm.t), 'n-neg') : null,
+    h('div', { class: 'n-eq' }, h('span', null, 'Patrimoine net'), h('b', { class: 'num' }, nE(K.net)))),
+    a.miss ? nSub(`${a.miss} ligne${a.miss > 1 ? 's' : ''} sans cours pour l’instant : non comptée${a.miss > 1 ? 's' : ''}.`) : null));
+
+  // 2. Répartition aujourd’hui et visée, dans un seul bloc
+  if (a.v > 0) {
+    const hasT = CLASSES.some(c => T[c] != null);
+    const rows = CLASSES.map(c => ({ c, w: agg(classEnvs(c).flatMap(e => e.lines)).v / a.v * 100, t: T[c] })).filter(r => r.w > 0.5 || r.t != null);
+    const need = hasT ? rows.map(r => Object.assign({ d: r.w - (r.t || 0) }, r)).sort((x, y) => x.d - y.d)[0] : null;
+    box.append(nWh('Répartition', null, hasT ? 'Modifier' : 'Fixer un objectif', () => go('#/a/t')));
+    box.append(nCard(h('div', { class: 'n-alloc' }, ...rows.map(r => { const el = h('div', { class: 'n-a' });
+        el.innerHTML = `<span>${escH(r.c)}</span><span class="n-t"><i style="width:${Math.min(100, r.w).toFixed(1)}%;background:${KCOL[r.c]}"></i>${r.t != null ? `<u style="left:${Math.min(100, r.t)}%"></u>` : ''}</span><span class="n-r"><b style="${r.t != null ? 'color:' + gapCol(r.w - r.t) : ''}">${Math.round(r.w)} %</b>${r.t != null ? `<small>visé ${Math.round(r.t)} %</small>` : ''}</span>`; return el; })),
+      hasT ? nSub('Le trait noir marque votre objectif. Vert : proche, rouge : pas assez, orange : trop.') : nSub('Fixez la répartition qui vous ressemble : snowball vous dira où placer vos prochains achats.'),
+      need && need.d <= -3 ? h('div', { class: 'n-buy' }, 'Vos prochains achats : ', h('b', null, `en priorité ${need.c === 'Épargne' ? 'sur l’épargne' : need.c === 'Immobilier' ? 'sur l’immobilier' : need.c === 'Autres' ? 'sur les autres actifs' : 'sur la ' + need.c}`), '.') : null));
+  }
+
+  // 3. Les comptes
   box.append(nWh('Comptes', null, `${S.envs.length}`));
-  box.append(nTight(...S.envs.map(e => { const x = agg(e.lines), pv = x.c > 0 ? (x.v - x.c) / x.c : null, n = e.lines.length;
-    return nRow({ t: e.name, s: TYPES[e.type].nc ? `${fr1(livretRate(e))} % par an` : `${TYPES[e.type].n} · ${n} ligne${n > 1 ? 's' : ''}`, onclick: () => go('#/e/' + e.id),
-      v: nE(x.v), vs: pv != null && Math.abs(x.v - x.c) >= 1 && !TYPES[e.type].nc ? h('span', { class: pv >= 0 ? 'n-pos' : 'n-neg' }, P.format(pv)) : null }); }),
+  box.append(nTight(...S.envs.slice().sort((x, y) => agg(y.lines).v - agg(x.lines).v).map(e => { const x = agg(e.lines), t = TYPES[e.type], g = x.v - x.c;
+    const sub = t.nc ? `${fr1(livretRate(e))} % par an` : `${t.n} · ${e.lines.length} ligne${e.lines.length > 1 ? 's' : ''}`;
+    return nRow({ t: e.name, s: !envDone(e) ? envTodo(e) : sub, onclick: () => go('#/e/' + e.id), v: nE(x.v),
+      vs: !t.nc && x.c > 0 && Math.abs(g) >= 1 ? h('span', { class: g >= 0 ? 'n-pos' : 'n-neg' }, P.format(g / x.c)) : null }); }),
     h('button', { class: 'n-more', onclick: () => openAddMenu() }, 'Ajouter un compte ou un placement')));
-  box.append(nWh('Tout le détail'), nDetail('Patrimoine complet', 'évolution, performances par placement, immobilier et crédits', '#/a/d'));
+
+  // 4. Les crédits
+  const C = creditsAll();
+  box.append(nWh('Crédits', 'var(--down)', C.length ? `${C.length}` : null));
+  box.append(nTight(...C.map(x => nRow({ t: x.name, s: (x.sub ? x.sub + ' · ' : '') + (x.c.partial ? 'conditions à compléter' : `${nE(x.c.tot)} / mois · fin ${x.c.endY}`),
+      onclick: () => go('#/k/' + x.id), v: '− ' + nE(x.c.crd), vc: 'var(--down)' })),
+    h('button', { class: 'n-more', onclick: () => openDebtEditor() }, C.length ? 'Ajouter un crédit' : 'Vous avez un crédit auto, conso, étudiant ? Ajoutez-le')));
+  return box;
+}
+
+/* ---------- PAGE D'UN COMPTE ---------- */
+function vAccount(id) {
+  const e = S.envs.find(x => x.id === id);
+  if (!e) { setTimeout(() => go('#/a')); return h('div'); }
+  const t = TYPES[e.type], a = agg(e.lines), g = a.v - a.c;
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nBack('#/a', 'Mon argent'), nHead(t.n, e.name));
+  const kv = [];
+  if (!t.nc && a.c > 0) kv.push([e.type === 'im' || e.type === 'au' ? 'Prix d’achat' : 'Vous avez versé', nE(a.c)], [g >= 0 ? 'Gain' : 'Perte', h('span', { class: g >= 0 ? 'n-pos' : 'n-neg' }, `${sE(g)} (${P.format(g / a.c)})`)]);
+  if (t.nc) kv.push(['Taux', `${fr1(livretRate(e))} % par an`], ['Intérêts', `≈ ${nE(a.v * livretRate(e) / 100)} par an`]);
+  if (e.type === 'av' && e.avRate != null) kv.push(['Rendement du fonds euros', `${fr1(e.avRate)} % par an`]);
+  if (a.dv > 0) kv.push(['Dividendes reçus', h('span', { class: 'n-pos' }, sE(a.dv))]);
+  box.append(nCard(nKick('Valeur aujourd’hui'), h('div', { class: 'n-big num' }, nE(a.v)),
+    kv.length ? h('div', { class: 'n-kv' }, ...kv.map(([k, v]) => h('div', null, h('span', null, k), h('b', { class: 'num' }, v)))) : null,
+    a.miss ? nSub(`${a.miss} ligne${a.miss > 1 ? 's' : ''} sans cours pour l’instant.`) : null));
+
+  // Ce qu'il contient
+  const isIm = e.type === 'im';
+  if (t.nc) box.append(h('button', { class: 'n-more', style: 'margin-top: 12px;', onclick: () => e.lines[0] ? go('#/l/' + e.id + '/' + e.lines[0].id) : openAddLineModal(e) }, 'Modifier le solde'));
+  else {
+  box.append(nWh(isIm ? 'Vos biens' : 'Ce qu’il contient', null, `${e.lines.length}`));
+  box.append(nTight(...e.lines.map(l => [l, val(l)]).sort((p, q) => (q[1] ? q[1].v : 0) - (p[1] ? p[1].v : 0)).map(([l, x]) => {
+      const lg = x ? x.v - x.c : 0;
+      const sub = isIm ? (l.loan && l.loan.amt > 0 ? `Crédit : ${nE(loanCalc(l.loan).crd)} restant dû` : 'Sans crédit')
+        : l.m ? `${N.format(l.qty)} ${l.kind === 'Crypto' ? '' : 'part' + (l.qty >= 2 ? 's' : '')} · ${l.sym}` : (l.kind || 'Montant saisi');
+      return nRow({ t: l.name, s: sub, onclick: () => go('#/l/' + e.id + '/' + l.id), v: x ? nE(x.v) : 'cours indisponible',
+        vs: x && x.c > 0 && Math.abs(lg) >= 1 && !t.nc ? h('span', { class: lg >= 0 ? 'n-pos' : 'n-neg' }, P.format(lg / x.c)) : null }); }),
+    h('button', { class: 'n-more', onclick: () => openAddLineModal(e) }, isIm ? 'Ajouter un bien' : 'Ajouter une ligne')));
+  }
+
+  // Réglages du compte
+  box.append(nWh('Réglages du compte'));
+  box.append(nTight(
+    nRow({ t: 'Renommer', s: e.name, onclick: () => renameModal(e, 'Nom du compte') }),
+    t.nc ? null : nRow({ t: 'Frais et impôt', s: `Frais ≈ ${nE(fees(e))} par an${e.tax != null ? ` · impôt ${fr1(e.tax)} % si vous vendiez` : ''}`, onclick: () => openEditFeesModal(e) }),
+    nRow({ t: h('span', { style: 'color: var(--down);' }, 'Supprimer ce compte'), s: `${e.lines.length} ligne${e.lines.length > 1 ? 's' : ''}, irréversible`, onclick: () => openConfirmModal({
+      title: 'Supprimer ce compte ?', message: `Supprimer « ${e.name} » et ses ${e.lines.length} lignes ? Cette action est irréversible.`,
+      confirmText: 'Supprimer définitivement', confirmStyle: 'btn-danger', check: (S.hist || []).length ? HIST_CHECK : undefined,
+      onConfirm: chk => { const before = netWorthNow(); S.envs = S.envs.filter(x => x !== e); if (chk) histShift(before - netWorthNow()); save(); toast('Compte supprimé'); go('#/a'); } }) })));
+  return box;
+}
+
+/* ---------- PAGE D'UN CRÉDIT ---------- */
+function vCredit(id) {
+  const x = creditsAll().find(z => z.id === id);
+  if (!x) { setTimeout(() => go('#/a')); return h('div'); }
+  const c = x.c, L = x.L;
+  const box = h('div', { class: 'n-view', style: '--cc: var(--down); --cl: var(--down-light);' }, nBack('#/a', 'Mon argent'), nHead(x.sub ? `Crédit · ${x.sub}` : 'Crédit', x.name));
+  if (c.partial) {
+    box.append(nCard(nKick('Montant emprunté'), h('div', { class: 'n-big num' }, nE(c.amt)),
+      nSub('Il compte entièrement dans vos dettes tant que le taux, la durée et la date de début ne sont pas renseignés.')),
+      h('button', { class: 'n-detail-btn', onclick: x.edit }, 'Compléter les conditions'));
+    return box;
+  }
+  const row = (k, v) => h('div', null, h('span', null, k), h('b', { class: 'num' }, v));
+  box.append(nCard(nKick('Reste à rembourser'), h('div', { class: 'n-big num' }, nE(c.crd)),
+    h('div', { class: 'n-bar', style: 'margin: 12px 0 6px;' }, h('i', { style: `width: ${(c.pct * 100).toFixed(1)}%; background: var(--up);` })),
+    nSub(`${P0.format(c.pct)} déjà remboursé · encore ${timeLeftTxt(c.left)}`),
+    h('div', { class: 'n-kv' },
+      row('Mensualité', `${nE(c.tot)}${c.ins > 0 ? ' (assurance comprise)' : ''}`),
+      row('Dernière mensualité', `${MONTHS_L[c.endM]} ${c.endY}`),
+      row('Montant emprunté', nE(c.amt)),
+      row('Taux', `${fr1(L.rate || 0)} % sur ${loanDurTxt(L.yrs)}`))));
+  box.append(nWh('Ce que coûte ce crédit', 'var(--down)'));
+  box.append(nCard(h('div', { class: 'n-kv' },
+      row('Intérêts', nE(c.interest)),
+      c.insTotal > 0 ? row('Assurance', nE(c.insTotal)) : null,
+      c.fees > 0 ? row('Frais de dossier et garantie', nE(c.fees)) : null,
+      h('div', { class: 'n-eq' }, h('span', null, 'Au total, vous rembourserez'), h('b', { class: 'num' }, nE(c.amt + c.cost))))));
+  box.append(h('button', { class: 'n-more', onclick: x.edit }, 'Modifier ou supprimer ce crédit'));
   return box;
 }
 
@@ -9035,13 +9147,6 @@ function vPlan() {
   return box;
 }
 
-function vMoneyDetail() {
-  const box = h('div', { class: 'n-view' }, nBack('#/a', 'Mon argent'), nHead('Tout le détail', 'Patrimoine complet'));
-  const ec = evoCard(); if (ec) box.append(ec);
-  const mc = moversCard(); if (mc) box.append(mc);
-  box.append(immoSection());
-  return box;
-}
 function vTarget() {
   const box = h('div', { class: 'n-view' }, nBack('#/a', 'Mon argent'), nHead('Vers où aller ?', 'Répartition visée'));
   const tc = targetCard(); if (tc) box.append(tc); else box.append(nNote('Ajoutez d’abord un compte ou un placement.'));
@@ -9057,11 +9162,12 @@ function render() {
 
   const views = {
     '': vToday,
-    'a': () => r[1] === 'd' ? vMoneyDetail() : r[1] === 't' ? vTarget() : vMoney(),
+    'a': () => r[1] === 't' ? vTarget() : vMoney(),
+    'k': () => vCredit(r.slice(1).join('/')),
     'b': vBall,
     'h': vHealth,
     'c': () => vClass(r[1]),
-    'e': () => vEnv(r[1]),
+    'e': () => vAccount(r[1]),
     'l': () => vLine(r[1], r[2]),
     'n': () => r[1] === 'd' ? withTop(nBack('#/n', 'Mes coûts'), vNet()) : vCosts(),
     's': () => r[1] === 'd' ? withTop(nBack('#/s', 'Mon plan'), vStrat()) : vPlan(),
@@ -9090,7 +9196,7 @@ function render() {
 }
 
 function updateNav(k) {
-  const activeIdx = ['', 'b', 'h'].includes(k) ? 0 : ['n', 'u'].includes(k) ? 2 : k === 'g' ? 3 : k === 's' ? 4 : 1;
+  const activeIdx = ['', 'b'].includes(k) ? 0 : ['n', 'u'].includes(k) ? 2 : k === 'g' ? 3 : k === 's' ? 4 : 1;
   
   const pendingBuysCount = (S.st && S.st[nowYear()] ? S.st[nowYear()].b.filter(b => isDueBuy(b, nowYear())).length : 0) + pendProv(nowYear()).length;
 
