@@ -1,5 +1,15 @@
 # Journal des modifications
 
+## Version 20 : plus de repères visuels
+De petits graphiques simples dans chaque écran, avec une palette de 8 couleurs vérifiée par calcul pour le daltonisme, en clair comme en sombre (`--s1` à `--s8`). Une couleur suit toujours la même chose (une famille de placements, une catégorie de dépenses, un compte), et chaque graphique a sa légende avec les valeurs. Toucher une barre ou une part affiche une bulle avec le détail.
+- **Accueil** : courbe de la boule avec repères de temps ; nouvelles tuiles « L'essentiel » (répartition, ce qu'il reste chaque mois, anneau des projets, anneau du plan de l'année) ; barre d'avancement de « Ce mois-ci » ; « Pourquoi ça a bougé » en barres de part et d'autre de zéro.
+- **Mon argent** : barre « à qui reviennent vos biens » (à vous / crédits / impôts) ; anneau de répartition avec montants ; part de chaque compte en mini-barre ; barre de remboursement de chaque crédit. Page Compte : anneau de composition. Page Crédit : courbe du capital restant dû avec « aujourd'hui » et barre du coût total (emprunté, intérêts, assurance, frais).
+- **Mes coûts** : barre « où vont vos revenus » ; une couleur par catégorie ; grosses dépenses en 12 colonnes ; coût du patrimoine en barres. Page Catégorie : anneau des postes.
+- **Mes projets** : un anneau par projet ; barre « ce que vos projets prennent sur votre épargne possible ». Page Projet : anneau, barre de financement par compte, courbe de trajectoire jusqu'à l'objectif.
+- **Mon plan** : anneau de l'année (fait / prévu). Page Mois : barre achats, mises de côté, grosses dépenses et marge ; le « ça passe » compte maintenant les grosses dépenses du mois.
+
+Tests : `node tests/appli.e2e.js` : **69/69**.
+
 ## Version 19 : refonte de l'appli après le questionnaire (14/11/2026)
 On garde les données, les calculs et le questionnaire de départ ; tout ce qui vient après est reconstruit sur une seule interface. Règles : 5 onglets, deux niveaux au plus (l'onglet, puis la page d'un élément), un chiffre à un seul endroit, on modifie là où on voit. Il n'y a plus de « Tout le détail », de fenêtres « En savoir plus » ni d'ancienne interface cachée.
 

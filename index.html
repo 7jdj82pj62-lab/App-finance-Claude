@@ -841,6 +841,8 @@ body { font-size: 16px; line-height: 1.55; }
   --radius-lg: 20px;
   --radius-xl: 26px;
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  /* Palette des graphiques (validée daltonisme, clair) */
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948; --s-rest: #DCE1E8;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -851,6 +853,7 @@ body { font-size: 16px; line-height: 1.55; }
   --up: #34C79A; --up-light: #0F2E25; --down: #F2777B; --down-light: #3A1A1D; --warn: #F0A54A; --warn-light: #3A2A14;
   --c0: #7D93FF; --c1: #F5B85F; --c2: #3FCB97; --c3: #B392F7; --c4: #A3ACBB;
   --ch1: #7D93FF; --ch1-l: #1C2547; --ch2: #F5A06D; --ch2-l: #3A2418; --ch3: #B392F7; --ch3-l: #2A2143; --ch4: #34C79A; --ch4-l: #0F2E25;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767; --s-rest: #2E3747;
 }
 @media (prefers-color-scheme: dark) {
   :root[data-theme="auto"] {
@@ -862,6 +865,7 @@ body { font-size: 16px; line-height: 1.55; }
     --up: #34C79A; --up-light: #0F2E25; --down: #F2777B; --down-light: #3A1A1D; --warn: #F0A54A; --warn-light: #3A2A14;
     --c0: #7D93FF; --c1: #F5B85F; --c2: #3FCB97; --c3: #B392F7; --c4: #A3ACBB;
     --ch1: #7D93FF; --ch1-l: #1C2547; --ch2: #F5A06D; --ch2-l: #3A2418; --ch3: #B392F7; --ch3-l: #2A2143; --ch4: #34C79A; --ch4-l: #0F2E25;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767; --s-rest: #2E3747;
   }
 }
 
@@ -1327,6 +1331,42 @@ button, a, label, .row-item, .wz-choice, .wz-chip, .chip-btn, .btn, .onb-tile { 
 .n-add { width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--border); font: inherit; color: inherit; cursor: pointer; gap: 12px; }
 .n-add-ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; flex: none; background: var(--surface-alt); color: var(--ink-secondary); }
 .n-add-k { margin: 16px 0 2px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--cc); }
+.vz-stack { display: flex; gap: 2px; border-radius: 99px; overflow: hidden; margin: 12px 0 4px; }
+.vz-stack i { display: block; min-width: 3px; }
+.vz-leg { display: grid; gap: 2px; margin-top: 8px; }
+.vz-leg.inline { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
+.vz-li { display: grid; grid-template-columns: 10px 1fr auto 42px; align-items: center; gap: 9px; padding: 6px 0; font-size: 13.5px; background: none; border: 0; font: inherit; color: var(--ink); text-align: left; width: 100%; }
+button.vz-li { cursor: pointer; }
+.vz-leg.inline .vz-li { display: flex; width: auto; padding: 0; gap: 6px; font-size: 12.5px; color: var(--ink-secondary); }
+.vz-li i { width: 10px; height: 10px; border-radius: 3px; }
+.vz-leg.two .vz-li { grid-template-columns: 10px 1fr; padding: 5px 0; } .vz-leg.two .vz-li i { align-self: start; margin-top: 4px; }
+.vz-li span { min-width: 0; } .vz-li em { display: block; font-style: normal; font-size: 12px; color: var(--muted); }
+.vz-li b { font-weight: 600; } .vz-li small { color: var(--muted); text-align: right; font-size: 12.5px; }
+.vz-donut { position: relative; flex: none; }
+.vz-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: 0; }
+.vz-sw { width: 10px; height: 34px; border-radius: 4px; flex: none; }
+.vz-donut svg { width: 100%; height: 100%; transform: none; display: block; }
+.vz-dc { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.1; }
+.vz-dc b { font-weight: 700; font-size: 15px; color: var(--ink); } .vz-dc span { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+.vz-row { display: flex; align-items: center; gap: 16px; }
+.vz-row > .vz-leg { flex: 1; min-width: 0; margin-top: 0; }
+.vz-cols svg, .vz-line svg { width: 100%; height: auto; display: block; overflow: visible; }
+.vz-ax { font-size: 10.5px; fill: var(--muted); font-weight: 600; } .vz-ax.hi { fill: var(--ink); }
+.vz-val { font-size: 10.5px; fill: var(--ink-secondary); font-weight: 700; }
+.vz-div { display: grid; gap: 8px; }
+.vz-dr { display: grid; grid-template-columns: minmax(0, 1.25fr) 1fr auto; align-items: center; gap: 10px; font-size: 13.5px; }
+.vz-dr span { color: var(--ink-secondary); } .vz-dr b { font-weight: 600; min-width: 64px; text-align: right; }
+.vz-dt { position: relative; height: 10px; } .vz-dt::before { content: ''; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--border); }
+.vz-dt i { position: absolute; top: 0; bottom: 0; }
+.vz-tip { position: fixed; z-index: 9999; pointer-events: none; opacity: 0; transition: opacity .15s; background: var(--ink); color: var(--surface); font-size: 12.5px; font-weight: 600; padding: 6px 10px; border-radius: 10px; max-width: 240px; box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+.vz-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.vz-tile { text-align: left; border: 1px solid var(--border); background: var(--surface); border-radius: 18px; padding: 12px 13px; font: inherit; color: var(--ink); cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.vz-tile .k { font-size: 12px; font-weight: 700; color: var(--cc); }
+.vz-tile .v { font-size: 17px; font-weight: 700; } .vz-tile .s { font-size: 12px; color: var(--muted); line-height: 1.3; }
+.vz-tile .vz-stack { margin: 2px 0 0; }
+.vz-tile .vz-leg.inline { gap: 2px 8px; } .vz-tile .vz-leg.inline .vz-li { font-size: 11px; gap: 4px; } .vz-tile .vz-li i { width: 8px; height: 8px; }
+.vz-tile-r { display: flex; align-items: center; gap: 10px; }
+.n-goal.vz-goal { display: flex; align-items: center; gap: 14px; }
 .n-card > .n-kv:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .n-kv > .n-eq { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
 .n-kv > .n-eq span { color: var(--ink); font-weight: 600; }
@@ -1413,7 +1453,7 @@ button.n-row { cursor: pointer; }
 .n-cal > button > .b i { display: block; min-height: 2px; box-sizing: border-box; }
 .n-cal span { font-size: 10.5px; color: var(--muted); font-weight: 600; }
 .n-cal .past .b { opacity: .4; } .n-cal .now span { color: var(--ink); }
-.n-cap { position: absolute; left: -4px; right: -4px; border-top: 2px dashed var(--up); z-index: 1; pointer-events: none; }
+.n-cap { position: absolute; left: -4px; right: -4px; border-top: 1.5px solid var(--up); z-index: 1; pointer-events: none; }
 .n-cap em { position: absolute; right: 0; top: -18px; font-size: 10.5px; font-style: normal; font-weight: 700; color: var(--up); background: var(--surface); padding: 0 4px; }
 .n-passive .n-big { font-size: 34px; color: var(--up); }
 .n-passive .n-svg { margin-top: 10px; }
@@ -5439,12 +5479,96 @@ document.addEventListener('keydown', ev => {
 
 const MONTHS_S = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 const MONTHS_L = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-const KCOL = { 'Bourse': 'var(--c0)', 'Crypto': 'var(--c1)', 'Épargne': 'var(--c2)', 'Immobilier': 'var(--c3)', 'Autres': 'var(--c4)' };
+const KCOL = { 'Bourse': 'var(--s1)', 'Crypto': 'var(--s2)', 'Épargne': 'var(--s3)', 'Immobilier': 'var(--s4)', 'Autres': 'var(--s5)' };
 const escH = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const nE = v => E0.format(Math.round(v));
 const sE = v => (v >= 0 ? '+ ' : '− ') + E0.format(Math.abs(Math.round(v)));
 const kE = v => Math.abs(v) >= 10000 ? (v < 0 ? '− ' : '') + Math.round(Math.abs(v) / 1000).toLocaleString('fr-FR') + ' k€' : E0.format(Math.round(v));
 const svgEl = html => { const d = h('div', { class: 'n-svg' }); d.innerHTML = html; return d; };
+
+/* ---------- Petits graphiques (palette --s1…--s8 dans l'ordre, jamais en boucle) ---------- */
+const SER = i => `var(--s${Math.min(i, 7) + 1})`;
+// Barre empilée à 100 % : parts = [{ k, v, c }]
+function vzStack(parts, hgt) {
+  const ps = parts.filter(p => p.v > 0.5), tot = ps.reduce((t, p) => t + p.v, 0) || 1;
+  return h('div', { class: 'vz-stack', style: `height: ${hgt || 14}px;`, role: 'img', 'aria-label': ps.map(p => `${p.k} ${P0.format(p.v / tot)}`).join(', ') },
+    ...ps.map(p => h('i', { style: `flex: ${p.v}; background: ${p.c};`, 'data-tip': `${p.k} : ${nE(p.v)} · ${P0.format(p.v / tot)}` })));
+}
+// Légende : pastille, nom, valeur, part (le texte reste en couleurs de texte)
+function vzLegend(parts, o) {
+  o = o || {}; const ps = parts.filter(p => p.v > 0.5 || p.keep), tot = o.tot || ps.reduce((t, p) => t + p.v, 0) || 1;
+  return h('div', { class: 'vz-leg' + (o.inline ? ' inline' : '') + (o.two ? ' two' : '') }, ...ps.map(p => h(p.fn ? 'button' : 'div', { class: 'vz-li', onclick: p.fn || null },
+    h('i', { style: `background: ${p.c};` }), h('span', null, p.k, o.two ? h('em', null, `${p.txt || nE(p.v)} · ${P0.format(p.v / tot)}`) : p.s ? h('em', null, p.s) : null),
+    o.inline || o.two ? null : h('b', { class: 'num' }, p.txt || nE(p.v)), o.inline || o.noPct || o.two ? null : h('small', null, P0.format(p.v / tot)))));
+}
+// Anneau (donut) avec 2 px d'air entre les parts et un texte au centre
+function vzDonut(parts, size, center, sub) {
+  const ps = parts.filter(p => p.v > 0.5), tot = ps.reduce((t, p) => t + p.v, 0) || 1, gap = ps.length > 1 ? 1.4 : 0;
+  let off = 25, arcs = '';
+  ps.forEach(p => { const len = p.v / tot * 100; arcs += `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${p.c}" stroke-width="5.2" stroke-dasharray="${Math.max(0.3, len - gap).toFixed(2)} ${(100 - Math.max(0.3, len - gap)).toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}"><title>${escH(p.k)} : ${escH(nE(p.v))} · ${P0.format(p.v / tot)}</title></circle>`; off -= len; });
+  const d = h('div', { class: 'vz-donut', style: `width: ${size}px; height: ${size}px;` });
+  d.innerHTML = `<svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--surface-alt)" stroke-width="5.2"/>${arcs}</svg>`;
+  if (center) d.append(h('div', { class: 'vz-dc' }, h('b', { class: 'num' }, center), sub ? h('span', null, sub) : null));
+  return d;
+}
+// Anneau de progression
+function vzRing(p, col, size, txt) {
+  const v = Math.max(0, Math.min(1, p || 0)), d = h('div', { class: 'vz-donut', style: `width: ${size}px; height: ${size}px;`, role: 'img', 'aria-label': P0.format(v) });
+  d.innerHTML = `<svg viewBox="0 0 42 42" aria-hidden="true"><circle cx="21" cy="21" r="15.915" fill="none" stroke="var(--surface-alt)" stroke-width="5"/>${v > 0 ? `<circle cx="21" cy="21" r="15.915" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(v * 100).toFixed(2)} ${(100 - v * 100).toFixed(2)}" stroke-dashoffset="25"/>` : ''}</svg>`;
+  d.append(h('div', { class: 'vz-dc' }, h('b', { class: 'num', style: `font-size: ${Math.round(size / 4.2)}px;` }, txt != null ? txt : P0.format(v))));
+  return d;
+}
+// Colonnes (12 mois…) : vals = [{ v, l, c, tip }], une valeur écrite sur la plus haute et sur la colonne mise en avant
+function vzCols(vals, o) {
+  o = o || {}; const W = 320, H = o.h || 96, n = vals.length, slot = W / n, bw = Math.min(24, slot - 6), mx = Math.max(1, ...vals.map(x => x.v)), top = 16, base = H - 16;
+  const iMax = vals.reduce((b, x, i) => x.v > vals[b].v ? i : b, 0);
+  let g = `<line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="var(--border)"/>`;
+  vals.forEach((x, i) => {
+    const hh = x.v > 0 ? Math.max(3, x.v / mx * (base - top)) : 0, cx = i * slot + slot / 2, y = base - hh, r = Math.min(4, hh / 2, bw / 2);
+    if (hh) g += `<path d="M${cx - bw / 2},${base} V${y + r} Q${cx - bw / 2},${y} ${cx - bw / 2 + r},${y} H${cx + bw / 2 - r} Q${cx + bw / 2},${y} ${cx + bw / 2},${y + r} V${base} Z" fill="${x.c || o.c || 'var(--s1)'}" opacity="${x.dim ? 0.35 : 1}"><title>${escH(x.tip || `${x.l} : ${nE(x.v)}`)}</title></path>`;
+    g += `<rect x="${i * slot}" y="0" width="${slot}" height="${H}" fill="transparent" data-tip="${escH(x.tip || `${x.l} : ${nE(x.v)}`)}"/>`;
+    g += `<text x="${cx}" y="${H - 3}" text-anchor="middle" class="vz-ax${x.hi ? ' hi' : ''}">${escH(x.l)}</text>`;
+    if (x.v > 0 && (i === iMax || x.hi) && o.labels !== false) g += `<text x="${cx}" y="${y - 4}" text-anchor="middle" class="vz-val">${escH(kE(x.v))}</text>`;
+  });
+  const d = h('div', { class: 'vz-cols' }); d.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escH(o.label || '')}">${g}</svg>`; return d;
+}
+// Courbe : pts = [[x 0..1, y]], ligne 2 px + voile à 10 %, point final cerclé ; refs = [{ y, l }] lignes de repère ; mark = { x, l }
+function vzLine(pts, o) {
+  o = o || {}; const W = 320, H = o.h || 110, pad = 8, top = 14, base = H - 18;
+  const ys = pts.map(p => p[1]).concat((o.refs || []).map(r => r.y)), mn = o.zero ? 0 : Math.min(...ys), mx = Math.max(...ys), sp = (mx - mn) || 1;
+  const X = x => pad + x * (W - 2 * pad), Yp = y => base - (y - mn) / sp * (base - top);
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Yp(p[1]).toFixed(1)}`).join(' ');
+  const c = o.c || 'var(--s1)', last = pts[pts.length - 1];
+  let g = `<line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="var(--border)"/>`;
+  (o.refs || []).forEach(r => { g += `<line x1="${pad}" x2="${W - pad}" y1="${Yp(r.y)}" y2="${Yp(r.y)}" stroke="var(--muted-light)" stroke-width="1"/><text x="${W - pad}" y="${Yp(r.y) - 4}" text-anchor="end" class="vz-ax">${escH(r.l)}</text>`; });
+  g += `<path d="${line} L${X(last[0]).toFixed(1)},${base} L${X(pts[0][0]).toFixed(1)},${base} Z" fill="${c}" opacity=".1"/><path d="${line}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+  if (o.mark) { const mp = pts.reduce((b, p) => Math.abs(p[0] - o.mark.x) < Math.abs(b[0] - o.mark.x) ? p : b, pts[0]); g += `<line x1="${X(mp[0])}" x2="${X(mp[0])}" y1="${top - 6}" y2="${base}" stroke="var(--ink)" stroke-width="1"/><circle cx="${X(mp[0])}" cy="${Yp(mp[1])}" r="4.5" fill="${c}" stroke="var(--surface)" stroke-width="2"/><text x="${Math.min(W - 40, Math.max(30, X(mp[0])))}" y="${top - 8 < 8 ? 9 : top - 8}" text-anchor="middle" class="vz-ax hi">${escH(o.mark.l)}</text>`; }
+  else g += `<circle cx="${X(last[0])}" cy="${Yp(last[1])}" r="4.5" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`;
+  (o.xl || []).forEach(([x, l]) => { g += `<text x="${X(x)}" y="${H - 3}" text-anchor="${x < 0.1 ? 'start' : x > 0.9 ? 'end' : 'middle'}" class="vz-ax">${escH(l)}</text>`; });
+  const d = h('div', { class: 'vz-line' }); d.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escH(o.label || '')}">${g}</svg>`; return d;
+}
+// Barres de part et d'autre de zéro : rows = [{ k, v, c }]
+function vzDiv(rows) {
+  const mx = Math.max(1, ...rows.map(r => Math.abs(r.v)));
+  return h('div', { class: 'vz-div' }, ...rows.map(r => { const w = Math.max(r.v ? 2 : 0, Math.abs(r.v) / mx * 50);
+    return h('div', { class: 'vz-dr', 'data-tip': `${r.k} : ${sE(r.v)}` }, h('span', null, r.k),
+      h('div', { class: 'vz-dt' }, h('i', { style: `width: ${w}%; ${r.v >= 0 ? 'left: 50%; border-radius: 0 4px 4px 0;' : `right: 50%; border-radius: 4px 0 0 4px;`} background: ${r.c};` })),
+      h('b', { class: 'num ' + (r.v >= 0 ? 'n-pos' : 'n-neg') }, sE(r.v))); }));
+}
+// Bulle d'info au survol ou au toucher de tout élément [data-tip]
+(() => {
+  let tip = null, tm = null;
+  const show = (el, x, y) => {
+    if (!tip) { tip = document.createElement('div'); tip.className = 'vz-tip'; tip.setAttribute('role', 'status'); document.body.append(tip); }
+    tip.textContent = el.getAttribute('data-tip'); tip.style.opacity = '1';
+    const r = tip.getBoundingClientRect();
+    tip.style.left = Math.min(innerWidth - r.width - 8, Math.max(8, x - r.width / 2)) + 'px'; tip.style.top = Math.max(8, y - r.height - 14) + 'px';
+    clearTimeout(tm); tm = setTimeout(() => { tip.style.opacity = '0'; }, 2600);
+  };
+  const find = e => e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+  document.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const el = find(e); if (el) show(el, e.clientX, e.clientY); else if (tip) tip.style.opacity = '0'; });
+  document.addEventListener('pointerdown', e => { const el = find(e); if (el) show(el, e.clientX, e.clientY); });
+})();
 const fvCalc = (pv, m, r, y) => { const i = r / 12, n = Math.round(y * 12); return n ? pv * Math.pow(1 + i, n) + (i ? m * (Math.pow(1 + i, n) - 1) / i : m * n) : pv; };
 
 /* ---------- Briques visuelles ---------- */
@@ -5586,28 +5710,29 @@ function vToday() {
   if (K.net) recordHist(K.net);
   // La boule
   const Hh = (S.hist || []).filter(x => new Date(x.d) >= Date.now() - 365 * 864e5);
-  let curve = '';
+  let curve = null;
   if (Hh.length >= 3) {
-    const mn = Math.min(...Hh.map(x => x.v)), sp = (Math.max(...Hh.map(x => x.v)) - mn) || 1, t0 = new Date(Hh[0].d).getTime(), ts = (Date.now() - t0) || 1;
-    const pts = Hh.map(x => [((new Date(x.d).getTime() - t0) / ts * 320), 66 - (x.v - mn) / sp * 52]);
-    const ln = pts.map(p => p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' L'), last = pts[pts.length - 1];
-    curve = `<svg class="n-curve" viewBox="0 0 320 74" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ng1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ch1)" stop-opacity=".16"/><stop offset="1" stop-color="var(--ch1)" stop-opacity="0"/></linearGradient></defs><path d="M${ln} L320 74 L0 74 Z" fill="url(#ng1)"/><path d="M${ln}" fill="none" stroke="var(--ch1)" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>`;
+    const t0 = new Date(Hh[0].d).getTime(), ts = (Date.now() - t0) || 1, mo = Math.round(ts / (30.4 * 864e5));
+    curve = vzLine(Hh.map(x => [(new Date(x.d).getTime() - t0) / ts, x.v]), { h: 92, c: 'var(--ch1)', label: 'Évolution du patrimoine net', xl: [[0, mo >= 11 ? 'il y a 12 mois' : `il y a ${Math.max(1, mo)} mois`], [1, 'aujourd’hui']] });
   }
   const hero = h('button', { class: 'n-card n-hero', onclick: () => go('#/b') },
     h('span', { class: 'n-go' }, 'Projeter ›'), nKick('Votre boule de neige', 'var(--ch1)'), h('div', { class: 'n-big num' }, nE(K.net)),
     K.d30 != null ? h('div', { class: 'n-hero-d' }, h('div', null, nPos(K.d30), ' sur 30 jours'), K.d365 != null ? h('div', null, nPos(K.d365), ' sur 12 mois') : null) : nSub('Ce qui vous appartient vraiment, crédits et impôts déduits.'));
-  if (curve) hero.append(svgEl(curve));
+  if (curve) hero.append(curve);
   box.append(hero);
   countUp(hero.querySelector('.n-big'), K.net);
+  box.append(essentialTiles(K));
 
   // Ce mois-ci
   // Ce mois-ci : seulement le mois en cours ; ce qui est en retard tient sur une ligne
   const all = monthPlan(), items = all.filter(x => !x.late), late = all.length - items.length;
-  box.append(nWh('Ce mois-ci', 'var(--ch4)'));
+  const nDone = items.filter(x => x.done).length;
+  box.append(nWh('Ce mois-ci', 'var(--ch4)', items.length ? `${nDone} sur ${items.length} fait${nDone > 1 ? 's' : ''}` : null));
   const rows = items.map(x => h('div', { class: 'n-todo' + (x.done ? ' done' : ''), style: '--cc: var(--ch4);' },
     h('span', { class: 'n-ck' }, x.done ? '✓' : ''), h('div', { class: 'n-tt' }, h('b', null, x.t), h('span', null, x.s)),
     x.fn ? h('button', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: x.fn }, 'Fait') : null));
   if (late) rows.push(nRow({ t: `${late} opération${late > 1 ? 's' : ''} des mois passés`, s: 'À valider ou à retirer dans Mon plan', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Voir') }));
+  if (items.length) rows.unshift(h('div', { class: 'n-bar', style: 'margin: 12px 0 4px; height: 6px;' }, h('i', { style: `width: ${(nDone / items.length * 100).toFixed(1)}%; background: var(--ch4);` })));
   box.append(rows.length ? nTight(...rows)
     : nTight(nRow({ t: 'Rien de prévu ce mois-ci', s: 'Programmez vos achats et mises de côté du mois.', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Mon plan') })));
 
@@ -5617,7 +5742,7 @@ function vToday() {
     const rows = [['Votre épargne', P.save, 'var(--ch4)'], ['Les marchés', P.mk, 'var(--ch1)'], ['Intérêts et dividendes', P.inc, 'var(--c1)'], ['Frais', P.fee, 'var(--down)']];
     if (Math.abs(P.jumps) >= 1) rows.push(['Comptes ajoutés ou retirés', P.jumps, 'var(--muted-light)']);
     box.append(nWh('Pourquoi ça a bougé', 'var(--ch1)', '30 derniers jours'));
-    box.append(nCard(h('div', { class: 'n-why' }, ...rows.flatMap(([k, v, c]) => [h('span', null, h('i', { style: `width: 4px; background: ${c};` }), k), h('b', { class: v >= 0 ? 'n-pos' : 'n-neg' }, sE(v))])),
+    box.append(nCard(vzDiv(rows.map(([k, v]) => ({ k, v, c: v >= 0 ? 'var(--up)' : 'var(--down)' }))),
       nSub(P.delta > 0 && P.save > P.delta / 2 ? 'Plus de la moitié de la hausse vient de votre effort. 👏' : P.mk >= 0 ? 'Les marchés vous ont porté ce mois-ci.' : 'Les marchés ont baissé : votre épargne amortit la chute.'),
     ));
   }
@@ -5626,6 +5751,24 @@ function vToday() {
   const al = homeAlert();
   if (al) box.append(nWh('À regarder', 'var(--warn)'), nTight(nRow({ lead: h('span', { class: 'n-d', style: 'background: var(--warn-light); color: var(--warn);' }, '!'), t: al.t, s: al.s, onclick: al.fn, vs: h('span', { class: 'n-pill' }, al.b) })));
   return box;
+}
+
+// L'essentiel : une tuile par onglet, avec un petit graphique
+function essentialTiles(K) {
+  const a = K.a, tile = (cc, href, k, vis, v, sub) => h('button', { class: 'vz-tile', style: `--cc: ${cc};`, onclick: () => go(href) }, h('span', { class: 'k' }, k), vis, v != null ? h('span', { class: 'v num' }, v) : null, sub ? h('span', { class: 's' }, sub) : null);
+  const cls = CLASSES.map(c => ({ k: c, v: agg(classEnvs(c).flatMap(e => e.lines)).v, c: KCOL[c] })).filter(x => x.v > 0.5), top = cls.slice().sort((x, y) => y.v - x.v)[0];
+  const t1 = tile('var(--ch1)', '#/a', 'Mon argent', a.v > 0 ? h('div', null, vzStack(cls, 10), vzLegend(cls.slice().sort((x, y) => y.v - x.v).slice(0, 3), { inline: true })) : null, null, top ? `Surtout ${top.k === 'Épargne' ? 'de l’épargne' : top.k === 'Immobilier' ? 'de l’immobilier' : top.k === 'Autres' ? 'd’autres actifs' : 'de la ' + top.k} (${P0.format(top.v / a.v)})` : 'Ajoutez vos comptes');
+  const B = K.B, sp = K.spend, cap = K.cap;
+  const cp = [{ k: 'Dépenses', v: sp, c: 'var(--s2)' }, { k: 'Mises de côté', v: K.prov, c: 'var(--s7)' }, { k: 'Reste', v: Math.max(0, cap), c: 'var(--s-rest)' }];
+  const t2 = tile('var(--ch2)', '#/n', 'Mes coûts', B.rev > 0 ? h('div', null, vzStack(cp, 10), vzLegend(cp, { inline: true })) : null,
+    B.rev > 0 ? `${nE(cap)} / mois` : null, B.rev > 0 ? (cap >= 0 ? 'il vous reste' : 'il vous manque') : 'Renseignez votre budget');
+  const X = goalCalc('net'), G = gl(), tg = G.reduce((t, g) => t + g.target, 0), fd = G.reduce((t, g) => t + Math.min(g.target, (X[g.id] || { funded: 0 }).funded), 0);
+  const t3 = tile('var(--ch3)', '#/g', 'Mes projets', G.length ? h('div', { class: 'vz-tile-r' }, vzRing(tg ? fd / tg : 0, 'var(--ch3)', 46), h('span', { class: 's' }, `${G.length} projet${G.length > 1 ? 's' : ''}, ${nE(fd)} sur ${nE(tg)}`)) : null, null, G.length ? null : 'Ajoutez un projet');
+  const T = getStrategy(nowYear()); let pl = 0, dn = 0;
+  for (let m = 0; m < 12; m++) { T.b.filter(b => b.m === m).forEach(b => { pl += b.done ? b.done.e || b.amt : b.amt; if (b.done) dn += b.done.e || b.amt; });
+    T.p.filter(p => m >= (p.f || 0) && provState(T, m, p) !== 'skip').forEach(p => { pl += p.amt; if (provState(T, m, p) === 'done') dn += p.amt; }); }
+  const t4 = tile('var(--ch4)', '#/s', 'Mon plan', pl ? h('div', { class: 'vz-tile-r' }, vzRing(dn / pl, 'var(--ch4)', 46), h('span', { class: 's' }, `${nE(dn)} faits sur ${nE(pl)} prévus en ${nowYear()}`)) : null, null, pl ? null : 'Programmez votre épargne');
+  return h('div', null, nWh('L’essentiel'), h('div', { class: 'vz-tiles' }, t1, t2, t3, t4));
 }
 
 // L'alerte de l'Accueil : d'abord ce qui manque, sinon le point faible de la santé financière
@@ -5716,7 +5859,8 @@ function vMoney() {
   }
   // 1. Le calcul en une ligne
   const eq = (k, v, cls) => h('div', null, h('span', null, k), h('b', { class: 'num' + (cls ? ' ' + cls : '') }, v));
-  box.append(nCard(h('div', { class: 'n-kv' },
+  const own = [{ k: 'À vous', v: Math.max(0, K.net), c: 'var(--s1)' }, { k: 'Crédits', v: K.debt, c: 'var(--s8)' }, { k: 'Impôts', v: K.sm.t, c: 'var(--s4)' }];
+  box.append(nCard(nKick('À qui reviennent vos biens'), vzStack(own, 16), vzLegend(own, { inline: true }), h('div', { class: 'n-kv', style: 'margin-top: 12px;' },
     eq('Ce que vous avez', nE(a.v)),
     K.debt > 0 ? eq('Crédits restant dus', '− ' + nE(K.debt), 'n-neg') : null,
     K.sm.t > 0 ? eq('Impôts si vous vendiez', '− ' + nE(K.sm.t), 'n-neg') : null,
@@ -5728,10 +5872,13 @@ function vMoney() {
     const hasT = CLASSES.some(c => T[c] != null);
     const rows = CLASSES.map(c => ({ c, w: agg(classEnvs(c).flatMap(e => e.lines)).v / a.v * 100, t: T[c] })).filter(r => r.w > 0.5 || r.t != null);
     const need = hasT ? rows.map(r => Object.assign({ d: r.w - (r.t || 0) }, r)).sort((x, y) => x.d - y.d)[0] : null;
-    box.append(nWh('Répartition', null, hasT ? 'Modifier' : 'Fixer un objectif', () => go('#/a/t')));
-    box.append(nCard(h('div', { class: 'n-alloc' }, ...rows.map(r => { const el = h('div', { class: 'n-a' });
-        el.innerHTML = `<span>${escH(r.c)}</span><span class="n-t"><i style="width:${Math.min(100, r.w).toFixed(1)}%;background:${KCOL[r.c]}"></i>${r.t != null ? `<u style="left:${Math.min(100, r.t)}%"></u>` : ''}</span><span class="n-r"><b style="${r.t != null ? 'color:' + gapCol(r.w - r.t) : ''}">${Math.round(r.w)} %</b>${r.t != null ? `<small>visé ${Math.round(r.t)} %</small>` : ''}</span>`; return el; })),
-      hasT ? nSub('Le trait noir marque votre objectif. Vert : proche, rouge : pas assez, orange : trop.') : nSub('Fixez la répartition qui vous ressemble : snowball vous dira où placer vos prochains achats.'),
+    box.append(nWh('Répartition', null, hasT ? 'Modifier l’objectif' : 'Fixer un objectif', () => go('#/a/t')));
+    const cls = CLASSES.map(c => ({ k: c, v: agg(classEnvs(c).flatMap(e => e.lines)).v, c: KCOL[c] })).filter(x => x.v > 0.5);
+    box.append(nCard(h('div', { class: 'vz-row' }, vzDonut(cls, 116, kE(a.v), 'vos biens'), vzLegend(cls.slice().sort((x, y) => y.v - x.v), { two: true })),
+      hasT ? h('div', { class: 'n-kick', style: 'margin-top: 16px;' }, 'Aujourd’hui et votre objectif') : null,
+      hasT ? h('div', { class: 'n-alloc' }, ...rows.map(r => { const el = h('div', { class: 'n-a' });
+        el.innerHTML = `<span>${escH(r.c)}</span><span class="n-t"><i style="width:${Math.min(100, r.w).toFixed(1)}%;background:${KCOL[r.c]}"></i>${r.t != null ? `<u style="left:${Math.min(100, r.t)}%"></u>` : ''}</span><span class="n-r"><b style="${r.t != null ? 'color:' + gapCol(r.w - r.t) : ''}">${Math.round(r.w)} %</b>${r.t != null ? `<small>visé ${Math.round(r.t)} %</small>` : ''}</span>`; return el; })) : null,
+      hasT ? nSub('Le petit trait vertical marque votre objectif. Vert : proche, rouge : pas assez, orange : trop.') : nSub('Fixez la répartition qui vous ressemble : snowball vous dira où placer vos prochains achats.'),
       need && need.d <= -3 ? h('div', { class: 'n-buy' }, 'Vos prochains achats : ', h('b', null, `en priorité ${need.c === 'Épargne' ? 'sur l’épargne' : need.c === 'Immobilier' ? 'sur l’immobilier' : need.c === 'Autres' ? 'sur les autres actifs' : 'sur la ' + need.c}`), '.') : null));
   }
 
@@ -5739,15 +5886,19 @@ function vMoney() {
   box.append(nWh('Comptes', null, `${S.envs.length}`));
   box.append(nTight(...S.envs.slice().sort((x, y) => agg(y.lines).v - agg(x.lines).v).map(e => { const x = agg(e.lines), t = TYPES[e.type], g = x.v - x.c;
     const sub = t.nc ? `${fr1(livretRate(e))} % par an` : `${t.n} · ${e.lines.length} ligne${e.lines.length > 1 ? 's' : ''}`;
-    return nRow({ t: e.name, s: !envDone(e) ? envTodo(e) : sub, onclick: () => go('#/e/' + e.id), v: nE(x.v),
-      vs: !t.nc && x.c > 0 && Math.abs(g) >= 1 ? h('span', { class: g >= 0 ? 'n-pos' : 'n-neg' }, P.format(g / x.c)) : null }); }),
+    const r = nRow({ lead: h('span', { class: 'vz-sw', style: `background: ${KCOL[t.c]};`, title: t.c }), t: e.name, s: !envDone(e) ? envTodo(e) : `${sub} · ${P0.format(a.v > 0 ? x.v / a.v : 0)} du total`, onclick: () => go('#/e/' + e.id), v: nE(x.v),
+      vs: !t.nc && x.c > 0 && Math.abs(g) >= 1 ? h('span', { class: g >= 0 ? 'n-pos' : 'n-neg' }, P.format(g / x.c)) : null });
+    r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 5px; margin-top: 6px;' }, h('i', { style: `width: ${(a.v > 0 ? x.v / a.v * 100 : 0).toFixed(1)}%; background: ${KCOL[t.c]};` })));
+    return r; }),
     h('button', { class: 'n-more', onclick: () => openAddMenu() }, 'Ajouter un compte ou un placement')));
 
   // 4. Les crédits
   const C = creditsAll();
   box.append(nWh('Crédits', 'var(--down)', C.length ? `${C.length}` : null));
-  box.append(nTight(...C.map(x => nRow({ t: x.name, s: (x.sub ? x.sub + ' · ' : '') + (x.c.partial ? 'conditions à compléter' : `${nE(x.c.tot)} / mois · fin ${x.c.endY}`),
-      onclick: () => go('#/k/' + x.id), v: '− ' + nE(x.c.crd), vc: 'var(--down)' })),
+  box.append(nTight(...C.map(x => { const r = nRow({ t: x.name, s: (x.sub ? x.sub + ' · ' : '') + (x.c.partial ? 'conditions à compléter' : `${nE(x.c.tot)} / mois · fin ${x.c.endY}`),
+      onclick: () => go('#/k/' + x.id), v: '− ' + nE(x.c.crd), vc: 'var(--down)' });
+      if (!x.c.partial) r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 5px; margin-top: 6px;', 'data-tip': `${P0.format(x.c.pct)} déjà remboursé` }, h('i', { style: `width: ${(x.c.pct * 100).toFixed(1)}%; background: var(--up);` })), h('span', null, `${P0.format(x.c.pct)} remboursé`));
+      return r; }),
     h('button', { class: 'n-more', onclick: () => openDebtEditor() }, C.length ? 'Ajouter un crédit' : 'Vous avez un crédit auto, conso, étudiant ? Ajoutez-le')));
   return box;
 }
@@ -5769,6 +5920,8 @@ function vAccount(id) {
 
   // Ce qu'il contient
   const isIm = e.type === 'im';
+  const comp = e.lines.map((l, i) => { const x = val(l); return { k: l.name, v: x ? x.v : 0, c: SER(i), id: l.id }; });
+  if (comp.filter(x => x.v > 0.5).length > 1) box.append(nWh('Composition'), nCard(h('div', { class: 'vz-row' }, vzDonut(comp, 104, kE(a.v), null), vzLegend(comp.slice().sort((x, y) => y.v - x.v), { two: true }))));
   if (t.nc) box.append(h('button', { class: 'n-more', style: 'margin-top: 12px;', onclick: () => e.lines[0] ? go('#/l/' + e.id + '/' + e.lines[0].id) : openAddLineModal(e) }, 'Modifier le solde'));
   else {
   box.append(nWh(isIm ? 'Vos biens' : 'Ce qu’il contient', null, `${e.lines.length}`));
@@ -5776,7 +5929,7 @@ function vAccount(id) {
       const lg = x ? x.v - x.c : 0;
       const sub = isIm ? (l.loan && l.loan.amt > 0 ? `Crédit : ${nE(loanCalc(l.loan).crd)} restant dû` : 'Sans crédit')
         : l.m ? `${N.format(l.qty)} ${l.kind === 'Crypto' ? '' : 'part' + (l.qty >= 2 ? 's' : '')} · ${l.sym}` : (l.kind || 'Montant saisi');
-      return nRow({ t: l.name, s: sub, onclick: () => go('#/l/' + e.id + '/' + l.id), v: x ? nE(x.v) : 'cours indisponible',
+      return nRow({ lead: comp.filter(z => z.v > 0.5).length > 1 && (comp.find(z => z.id === l.id) || {}).v > 0.5 ? h('span', { class: 'vz-sw', style: `background: ${(comp.find(z => z.id === l.id) || {}).c};` }) : null, t: l.name, s: sub, onclick: () => go('#/l/' + e.id + '/' + l.id), v: x ? nE(x.v) : 'cours indisponible',
         vs: x && x.c > 0 && Math.abs(lg) >= 1 && !t.nc ? h('span', { class: lg >= 0 ? 'n-pos' : 'n-neg' }, P.format(lg / x.c)) : null }); }),
     h('button', { class: 'n-more', onclick: () => openAddLineModal(e) }, isIm ? 'Ajouter un bien' : 'Ajouter une ligne')));
   }
@@ -5814,12 +5967,15 @@ function vCredit(id) {
       row('Dernière mensualité', `${MONTHS_L[c.endM]} ${c.endY}`),
       row('Montant emprunté', nE(c.amt)),
       row('Taux', `${fr1(L.rate || 0)} % sur ${loanDurTxt(L.yrs)}`))));
+  const [sy, sm] = String(L.start || '').split('-').map(Number), y0 = sy || nowYear(), pts = [];
+  for (let m = 0; m <= c.n; m += Math.max(1, Math.round(c.n / 60))) pts.push([m / c.n, c.crdAt(m)]);
+  pts.push([1, 0]);
+  box.append(nWh('Le capital restant dû'), nCard(vzLine(pts, { h: 120, c: 'var(--s8)', zero: true, label: 'Capital restant dû', mark: { x: c.k / c.n, l: 'aujourd’hui' }, xl: [[0, String(y0)], [1, String(c.endY)]] }),
+    nSub(`La courbe descend plus vite à la fin : au début, la mensualité paie surtout des intérêts.`)));
+  const cost = [{ k: 'Montant emprunté', v: c.amt, c: 'var(--s1)' }, { k: 'Intérêts', v: c.interest, c: 'var(--s2)' }, { k: 'Assurance', v: c.insTotal, c: 'var(--s3)' }, { k: 'Frais', v: c.fees, c: 'var(--s4)' }];
   box.append(nWh('Ce que coûte ce crédit', 'var(--down)'));
-  box.append(nCard(h('div', { class: 'n-kv' },
-      row('Intérêts', nE(c.interest)),
-      c.insTotal > 0 ? row('Assurance', nE(c.insTotal)) : null,
-      c.fees > 0 ? row('Frais de dossier et garantie', nE(c.fees)) : null,
-      h('div', { class: 'n-eq' }, h('span', null, 'Au total, vous rembourserez'), h('b', { class: 'num' }, nE(c.amt + c.cost))))));
+  box.append(nCard(nKick('Sur tout ce que vous rembourserez'), vzStack(cost, 16), vzLegend(cost),
+    h('div', { class: 'n-kv' }, h('div', { class: 'n-eq' }, h('span', null, 'Au total, vous rembourserez'), h('b', { class: 'num' }, nE(c.amt + c.cost))))));
   box.append(h('button', { class: 'n-more', onclick: x.edit }, 'Modifier ou supprimer ce crédit'));
   return box;
 }
@@ -5834,17 +5990,19 @@ function vCosts() {
   if (!(B.rev > 0)) {
     box.append(nTight(nRow({ t: 'Combien gagnez-vous par mois ?', s: 'Vos revenus nets : c’est le point de départ pour calculer votre épargne possible.', onclick: () => openRevenueEditModal(B), vs: h('span', { class: 'n-pill' }, 'Renseigner') })));
   } else {
-    const gs = Object.entries(B.groups).map(([gk, g]) => ({ gk, g, v: totalGroupSpend(g) })).sort((x, y) => y.v - x.v);
-    const cap = K.cap;
+    const gs = Object.entries(B.groups).map(([gk, g], i) => ({ gk, g, v: totalGroupSpend(g), c: SER(i) })).sort((x, y) => y.v - x.v);
+    const cap = K.cap, nG = Object.keys(B.groups).length;
+    const flow = [...gs.map(x => ({ k: x.g.name, v: x.v, c: x.c })), { k: 'Mises de côté', v: K.prov, c: SER(nG) }, { k: 'Il vous reste', v: Math.max(0, cap), c: 'var(--s-rest)' }];
     box.append(nCard(
       nKick(cap >= 0 ? 'Il vous reste chaque mois' : 'Il vous manque chaque mois', cap >= 0 ? 'var(--up)' : 'var(--down)'),
       h('div', { class: 'n-big num', style: cap < 0 ? 'color: var(--down);' : null }, nE(Math.abs(cap))),
       nSub(cap >= 0 ? 'C’est votre épargne possible : ce que vous pouvez placer ou garder pour vos projets.' : 'Vos dépenses dépassent vos revenus : regardez les plus gros postes.'),
+      h('div', { class: 'n-kick', style: 'margin-top: 16px;' }, `Où vont vos ${nE(B.rev)} de revenus`), vzStack(flow, 18), vzLegend(flow, { inline: true }),
       h('div', { class: 'n-buds' },
         h('button', { class: 'n-bud n-bud-rev', onclick: () => openRevenueEditModal(B) }, h('div', { class: 'n-bud-h' }, h('span', null, 'Revenus'), h('b', { class: 'num n-pos' }, '+ ' + nE(B.rev)))),
-        ...gs.map(({ gk, g, v }) => h('button', { class: 'n-bud', onclick: () => go('#/n/c/' + gk) },
-          h('div', { class: 'n-bud-h' }, h('span', null, g.name, v ? h('em', null, `${P0.format(v / B.rev)} des revenus`) : h('em', null, 'à renseigner')), h('b', { class: 'num' }, v ? '− ' + nE(v) : '—')),
-          v ? h('div', { class: 'n-bar', style: 'margin-top: 6px;' }, h('i', { style: `width: ${Math.min(100, v / B.rev * 100).toFixed(1)}%; background: var(--ch2);` })) : null)),
+        ...gs.map(({ gk, g, v, c }) => h('button', { class: 'n-bud', onclick: () => go('#/n/c/' + gk) },
+          h('div', { class: 'n-bud-h' }, h('span', null, h('i', { class: 'vz-dot', style: `background: ${c};` }), g.name, v ? h('em', null, `${P0.format(v / B.rev)} des revenus`) : h('em', null, 'à renseigner')), h('b', { class: 'num' }, v ? '− ' + nE(v) : '—')),
+          v ? h('div', { class: 'n-bar', style: 'margin-top: 6px;' }, h('i', { style: `width: ${Math.min(100, v / B.rev * 100).toFixed(1)}%; background: ${c};` })) : null)),
         K.prov > 0 ? h('button', { class: 'n-bud', onclick: () => go('#/s') }, h('div', { class: 'n-bud-h' }, h('span', null, 'Mises de côté prévues', h('em', null, 'dans Mon plan')), h('b', { class: 'num' }, '− ' + nE(K.prov)))) : null),
       h('button', { class: 'n-more', onclick: () => openGroupModal(B) }, 'Ajouter une catégorie')));
 
@@ -5852,7 +6010,9 @@ function vCosts() {
     const bills = (B.annualBills || []).slice().sort((x, y) => (x.dueMonth || 0) - (y.dueMonth || 0));
     const bt = bills.reduce((t, x) => t + x.amt, 0);
     box.append(nWh('Les grosses dépenses de l’année', null, bt ? nE(bt) : null));
-    box.append(nTight(...bills.map(x => nRow({ t: x.name, s: `en ${MONTHS_L[x.dueMonth || 0]}`, v: nE(x.amt), onclick: () => billModal(B, x) })),
+    const bm = MONTHS_S.map((l, m) => ({ l, v: bills.filter(x => (x.dueMonth || 0) === m).reduce((t, x) => t + x.amt, 0), hi: m === nowMonth(), tip: `${MONTHS_L[m]} : ${bills.filter(x => (x.dueMonth || 0) === m).map(x => x.name).join(', ') || 'rien'}` }));
+    box.append(nTight(bills.length ? h('div', { style: 'padding-top: 12px;' }, vzCols(bm, { c: 'var(--s2)', h: 100, label: 'Grosses dépenses par mois' })) : null,
+      ...bills.map(x => nRow({ t: x.name, s: `en ${MONTHS_L[x.dueMonth || 0]}`, v: nE(x.amt), onclick: () => billModal(B, x) })),
       bills.length ? nSub(`Soit ≈ ${nE(bt / 12)} par mois à mettre de côté pour ne pas être pris de court.`) : null,
       h('button', { class: 'n-more', onclick: () => billModal(B) }, bills.length ? 'Ajouter une dépense' : 'Taxe foncière, assurance, impôts… Ajoutez-les')));
   }
@@ -5865,7 +6025,8 @@ function vCosts() {
   if (rows.length) {
     const tot = rows.reduce((t, x) => t + x.v, 0);
     box.append(nWh('Ce que coûte votre patrimoine', 'var(--down)'));
-    box.append(nTight(h('div', { class: 'n-sub', style: 'padding: 12px 0 4px;' }, 'Sur 20 ans, au total : ', h('b', { style: 'color: var(--down);' }, '− ' + kE(tot))),...rows.sort((x, y) => y.v - x.v).map(x => nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)', onclick: x.fn || null }))),
+    box.append(nTight(h('div', { class: 'n-sub', style: 'padding: 12px 0 4px;' }, 'Sur 20 ans, au total : ', h('b', { style: 'color: var(--down);' }, '− ' + kE(tot))),...rows.sort((x, y) => y.v - x.v).map((x, i, all) => { const r = nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)', onclick: x.fn || null });
+      r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 6px; margin-top: 6px;' }, h('i', { style: `width: ${(x.v / all[0].v * 100).toFixed(1)}%; background: var(--down);` }))); return r; })),
       nNote('Cumul sur 20 ans, avec l’hypothèse d’un placement à 4 % par an. Repères pédagogiques, pas des conseils en investissement.'));
   }
   return box;
@@ -5904,7 +6065,10 @@ function vBudgetGroup(gk) {
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch2); --cl: var(--ch2-l);' }, nBack('#/n', 'Mes coûts'), nHead('Dépenses du mois', g.name));
   const totB = h('div', { class: 'n-big num' }, nE(totalGroupSpend(g)));
   const refresh = () => { totB.textContent = nE(totalGroupSpend(g)); };
-  box.append(nCard(nKick('Total par mois'), totB, nSub('Touchez un montant pour le modifier. Il est enregistré aussitôt.')));
+  const its = g.items.map((it, i) => ({ k: it.name, v: it.amt || 0, c: SER(i) })), B0 = B.rev;
+  box.append(nCard(nKick('Total par mois'), totB, B0 > 0 ? nSub(`${P0.format(totalGroupSpend(g) / B0)} de vos revenus`) : null,
+    its.filter(x => x.v > 0.5).length > 1 ? h('div', { class: 'vz-row', style: 'margin-top: 12px;' }, vzDonut(its, 96, null), vzLegend(its.slice().sort((x, y) => y.v - x.v), { two: true })) : null,
+    nSub('Touchez un montant ci-dessous pour le modifier. Il est enregistré aussitôt.')));
   box.append(nWh('Postes', null, `${g.items.length}`));
   box.append(nTight(...g.items.map(it => {
       const inp = h('input', { class: 'n-amt num', type: 'text', inputmode: 'decimal', value: it.amt ? String(it.amt).replace('.', ',') : '', placeholder: '0', 'aria-label': 'Montant de ' + it.name });
@@ -5941,10 +6105,10 @@ function vProjects() {
   // 2. Tous les projets
   box.append(nWh('Vos projets', null, `${G.length}`));
   box.append(nTight(...eff.map(({ g, x, e }) => { const p = g.target > 0 ? Math.min(1, x.funded / g.target) : 0, done = isGoalDone(g, x);
-    return h('button', { class: 'n-goal', onclick: () => go('#/g/' + g.id) },
-      h('div', { class: 'n-gh' }, h('b', null, g.name), h('em', { style: done ? 'color: var(--up);' : null }, done ? 'Atteint ✓' : P0.format(p))),
+    return h('button', { class: 'n-goal vz-goal', onclick: () => go('#/g/' + g.id) }, vzRing(p, done ? 'var(--up)' : 'var(--ch3)', 52), h('div', { style: 'flex: 1; min-width: 0;' },
+      h('div', { class: 'n-gh' }, h('b', null, g.name), h('em', { style: done ? 'color: var(--up);' : null }, done ? 'Atteint ✓' : `${fmtGoalDate(e.gd)}`)),
       h('div', { class: 'n-bar' }, h('i', { style: `width: ${(p * 100).toFixed(1)}%;${done ? ' background: var(--up);' : ''}` })),
-      h('div', { class: 'n-gf' }, h('span', null, `${nE(x.funded)} sur ${nE(g.target)}`), h('span', null, `${e.effort > 0 ? nE(e.effort) + ' / mois · ' : ''}${fmtGoalDate(e.gd)}`))); }),
+      h('div', { class: 'n-gf' }, h('span', null, `${nE(x.funded)} sur ${nE(g.target)}`), h('span', null, e.effort > 0 ? `${nE(e.effort)} / mois` : ''))));}),
     h('button', { class: 'n-more', onclick: () => openGoalModal() }, 'Ajouter un projet')));
   // 3. Est-ce que ça passe ?
   const tot = eff.reduce((t, z) => t + z.e.effort, 0);
@@ -5953,7 +6117,10 @@ function vProjects() {
     if (!B_ok()) box.append(nTight(nRow({ t: `Vos projets demandent ${nE(tot)} par mois`, s: 'Renseignez votre budget pour savoir si c’est possible.', onclick: () => go('#/n'), vs: h('span', { class: 'n-pill' }, 'Budget') })));
     else {
       const cap = Math.max(0, K.cap), ok = tot <= cap;
-      box.append(nCard(h('div', { class: 'n-kv' },
+      const parts = eff.filter(z => z.e.effort > 0).map(z => ({ k: z.g.name, v: z.e.effort, c: SER(gl().indexOf(z.g)) }));
+      if (ok) parts.push({ k: 'Marge', v: cap - tot, c: 'var(--s-rest)' });
+      box.append(nCard(nKick(ok ? 'Ce que vos projets prennent sur votre épargne possible' : 'Vos projets demandent plus que votre épargne possible'), vzStack(parts, 16), vzLegend(parts, { inline: true }),
+        h('div', { class: 'n-kv', style: 'margin-top: 12px;' },
           h('div', null, h('span', null, 'Vos projets demandent'), h('b', { class: 'num' }, `${nE(tot)} / mois`)),
           h('div', null, h('span', null, 'Votre épargne possible'), h('b', { class: 'num' }, `${nE(cap)} / mois`)),
           h('div', { class: 'n-eq' }, h('span', null, ok ? 'Il vous reste' : 'Il manque'), h('b', { class: 'num', style: `color: ${ok ? 'var(--up)' : 'var(--down)'};` }, `${nE(Math.abs(cap - tot))} / mois`))),
@@ -5971,9 +6138,12 @@ function vProject(id) {
   const x = goalCalc('net')[id] || { funded: 0, parts: [] }, e = goalEffort(g, x), done = isGoalDone(g, x);
   const p = g.target > 0 ? Math.min(1, x.funded / g.target) : 0;
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch3); --cl: var(--ch3-l);' }, nBack('#/g', 'Mes projets'), nHead(g.type || 'Projet', g.name));
-  box.append(nCard(nKick(done ? 'Objectif atteint ✓' : 'Déjà financé', done ? 'var(--up)' : null), h('div', { class: 'n-big num' }, nE(x.funded)),
-    nSub(`sur ${nE(g.target)} · pour ${fmtGoalDate(e.gd)}${e.n > 0 ? ` (dans ${e.n} mois)` : ''}`),
-    h('div', { class: 'n-bar', style: 'margin-top: 10px;' }, h('i', { style: `width: ${(p * 100).toFixed(1)}%;${done ? ' background: var(--up);' : ''}` }))));
+  const fin = (x.parts || []).map((pt, i) => { const en = S.envs.find(z => z.id === pt.id); return { k: en ? en.name : 'Compte', v: pt.amt, c: SER(i) }; }).filter(z => z.v > 0.5);
+  const finS = [...fin, { k: 'Reste à trouver', v: Math.max(0, g.target - x.funded), c: 'var(--s-rest)' }];
+  box.append(nCard(h('div', { class: 'vz-row' }, vzRing(p, done ? 'var(--up)' : 'var(--ch3)', 92),
+      h('div', null, nKick(done ? 'Objectif atteint ✓' : 'Déjà financé', done ? 'var(--up)' : null), h('div', { class: 'n-big num', style: 'font-size: 30px;' }, nE(x.funded)),
+        nSub(`sur ${nE(g.target)} · pour ${fmtGoalDate(e.gd)}${e.n > 0 ? ` (dans ${e.n} mois)` : ''}`))),
+    vzStack(finS, 14), vzLegend(finS, { inline: true })));
   if (!done) {
     const row = (k, v) => h('div', null, h('span', null, k), h('b', { class: 'num' }, v));
     box.append(nWh('Pour y arriver'));
@@ -5982,12 +6152,18 @@ function vProject(id) {
       e.planned > 0 ? row('Déjà programmé dans Mon plan', '− ' + nE(Math.min(e.planned, e.rest))) : null,
       h('div', { class: 'n-eq' }, h('span', null, 'À mettre de côté chaque mois'), h('b', { class: 'num', style: 'color: var(--ch3);' }, e.effort > 0 ? nE(e.effort) : '0 €'))),
       e.effort > 0 && e.n > 0 ? nSub(`Pendant ${e.n} mois, sur les comptes ci-dessous.`) : null));
+    if (e.n > 1) {
+      const pts = []; for (let m = 0; m <= e.n; m++) pts.push([m / e.n, Math.min(g.target, x.funded + (e.target != null ? 0 : 0) + (Math.min(e.planned, e.rest) + e.effort * e.n) * m / e.n)]);
+      box.append(nWh('Votre trajectoire'), nCard(vzLine(pts, { h: 120, c: 'var(--ch3)', refs: [{ y: g.target, l: `objectif ${kE(g.target)}` }], label: 'Trajectoire du projet', xl: [[0, 'aujourd’hui'], [1, fmtGoalDate(e.gd)]] }),
+        nSub(`En mettant ${nE(e.effort)} de côté chaque mois, vous atteignez ${nE(g.target)} à temps.`)));
+    }
   }
   box.append(nWh('Les comptes qui le financent', null, `${(g.envs || []).length}`));
   const parts = x.parts || [];
   box.append(nTight(...(g.envs || []).map(eid => { const en = S.envs.find(z => z.id === eid); if (!en) return null;
       const pt = parts.find(z => z.id === eid), amt = pt ? pt.amt : 0, av = Math.max(0, agg(en.lines).v - taxe(en));
-      return nRow({ t: en.name, s: amt >= av - 0.5 ? 'tout le compte' : amt > 0 ? `une partie, sur ${nE(av)}` : 'déjà pris par un projet plus proche', v: nE(amt), onclick: () => go('#/e/' + en.id) }); }).filter(Boolean),
+      const fc = fin.find(z => z.k === en.name);
+      return nRow({ lead: fc ? h('span', { class: 'vz-sw', style: `background: ${fc.c};` }) : null, t: en.name, s: amt >= av - 0.5 ? 'tout le compte' : amt > 0 ? `une partie, sur ${nE(av)}` : 'déjà pris par un projet plus proche', v: nE(amt), onclick: () => go('#/e/' + en.id) }); }).filter(Boolean),
     !(g.envs || []).length ? nSub('Aucun compte choisi : ce projet ne peut pas encore avancer.') : null));
   box.append(nWh('Réglages du projet'));
   box.append(nTight(
@@ -6053,7 +6229,8 @@ function vPlan(year) {
   });
   const yTot = months.reduce((t, x) => t + x.done + x.todo, 0), yDone = months.reduce((t, x) => t + x.done, 0);
   box.append(nCard(cal, nSub('Touchez un mois pour le voir. Vert : achats et mises de côté · pointillé : à valider · orange : grosse dépense.'),
-    yTot > 0 ? h('div', { class: 'n-kv' }, h('div', null, h('span', null, `Prévu en ${Y}`), h('b', { class: 'num' }, nE(yTot))), h('div', null, h('span', null, 'Déjà fait'), h('b', { class: 'num n-pos' }, nE(yDone)))) : null));
+    yTot > 0 ? h('div', { class: 'vz-row', style: 'margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);' }, vzRing(yDone / yTot, 'var(--ch4)', 64),
+      h('div', { class: 'n-kv', style: 'flex: 1; margin: 0; padding: 0; border: 0;' }, h('div', null, h('span', null, `Prévu en ${Y}`), h('b', { class: 'num' }, nE(yTot))), h('div', null, h('span', null, 'Déjà fait'), h('b', { class: 'num n-pos' }, nE(yDone))), h('div', null, h('span', null, 'Reste à faire'), h('b', { class: 'num' }, nE(yTot - yDone))))) : null));
 
   // 2. En retard (mois passés)
   if (Y === Y0) {
@@ -6100,8 +6277,12 @@ function vMonth(Y, m) {
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, nBack(Y === Y0 ? '#/s' : '#/s/' + Y, 'Mon plan'), nHead(due ? (Y === Y0 && m === M ? 'Ce mois-ci' : 'Mois passé') : 'À venir', `${MONTHS_L[m][0].toUpperCase() + MONTHS_L[m].slice(1)} ${Y}`));
   const buys = T.b.filter(b => b.m === m), provs = T.p.filter(p => m >= (p.f || 0)), bills = (B.annualBills || []).filter(b => (b.dueMonth || 0) === m);
   const tot = buys.reduce((t, b) => t + (b.done ? b.done.e || b.amt : b.amt), 0) + provs.filter(p => provState(T, m, p) !== 'skip').reduce((t, p) => t + p.amt, 0);
+  const bAmt = buys.reduce((t, b) => t + (b.done ? b.done.e || b.amt : b.amt), 0), pAmt = provs.filter(p => provState(T, m, p) !== 'skip').reduce((t, p) => t + p.amt, 0), blAmt = bills.reduce((t, x) => t + x.amt, 0);
+  const mp = [{ k: 'Achats', v: bAmt, c: 'var(--s1)' }, { k: 'Mises de côté', v: pAmt, c: 'var(--s7)' }, { k: 'Grosses dépenses', v: blAmt, c: 'var(--s2)' }, { k: 'Marge', v: Math.max(0, K.cap - bAmt - pAmt - blAmt), c: 'var(--s-rest)' }];
   box.append(nCard(nKick('Prévu ce mois'), h('div', { class: 'n-big num' }, nE(tot)),
-    K.cap > 0 ? nSub(tot <= K.cap ? `Sur ${nE(K.cap)} d’épargne possible : ça passe.` : `Plus que vos ${nE(K.cap)} d’épargne possible : il manque ${nE(tot - K.cap)}.`) : null));
+    K.cap > 0 ? h('div', null, vzStack(mp, 16), vzLegend(mp, { inline: true })) : null,
+    blAmt > 0 ? nSub(`Plus ${nE(blAmt)} de grosses dépenses ce mois-ci.`) : null,
+    K.cap > 0 ? nSub(tot + blAmt <= K.cap ? `Sur ${nE(K.cap)} d’épargne possible : ça passe.` : `Plus que vos ${nE(K.cap)} d’épargne possible : il manque ${nE(tot + blAmt - K.cap)}.`) : null));
   const st = (txt, col) => h('span', { class: 'n-pill', style: `--cc: ${col}; --cl: transparent;` }, txt);
   box.append(nWh('Achats', null, `${buys.length}`));
   box.append(nTight(...buys.map(b => nRow({ t: b.name, s: `${nE(b.done ? b.done.e || b.amt : b.amt)} · ${envNm(b.env)}`,

@@ -4,7 +4,7 @@ module.exports = function demoState() {
   const hist = [];
   for (let i = 365; i >= 1; i -= 7) {
     const d = new Date(now.getTime() - i * 864e5);
-    hist.push({ d: d.toISOString().slice(0, 10), v: Math.round(150000 + (365 - i) * 38 + Math.sin(i / 20) * 1500) });
+    hist.push({ d: d.toISOString().slice(0, 10), v: Math.round(139000 + (365 - i) * 38 + Math.sin(i / 20) * 1500) });
   }
   const groups = {
     daily: { name: 'Vie quotidienne', color: 'var(--c0)', items: [{ id: 'i1', name: 'Alimentation & Courses', amt: 450 }, { id: 'i2', name: 'Transports & Carburant', amt: 150 }, { id: 'i3', name: 'Loisirs & Sorties', amt: 120 }] },

@@ -103,7 +103,7 @@ const num = s => +String(s).replace(/[^\d,-]/g, '').replace(',', '.');
     ok('budget : « 12abc » refusé', (await inp.inputValue()) === '1000');
     await go(p, '#/n');
     ok('épargne possible recalculée (3600 − 1130 − 720 − 25 − 150)', num(await p.textContent('.n-big')) === 1575);
-    await p.getByText('Taxe foncière').click(); await p.waitForTimeout(150);
+    await p.getByText('Taxe foncière', { exact: true }).click(); await p.waitForTimeout(150);
     await p.fill('#modal-root input[inputmode=decimal]', '1200'); await p.getByText('Enregistrer').click(); await p.waitForTimeout(150);
     ok('grosse dépense modifiée', await p.evaluate(() => S.bud.annualBills.find(x => x.name === 'Taxe foncière').amt === 1200));
 
