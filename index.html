@@ -8567,10 +8567,11 @@ function monthPlan() {
   T.b.filter(b => b.m === M && b.done).forEach(b => out.push({ done: true, t: 'Acheter ' + b.name, s: `${envN(b.env)} · ${nE(b.amt)}` }));
   T.p.filter(p => (T.pd[M] || []).includes(p.id)).forEach(p => out.push({ done: true, t: `Mettre de côté ${nE(p.amt)}`, s: `${envN(p.env)} · ${p.name}` }));
   T.b.filter(b => isDueBuy(b, Y)).forEach(b => {
+    if (b.m < M) { out.push({ late: true }); return; }
     const qq = b.sym ? M_Q(b.sym) : null;
     out.push({ t: 'Acheter ' + b.name, s: `${envN(b.env)} · ${nE(b.amt)}${qq ? ` · ≈ ${fr1(b.amt / qq).replace(',0', '')} ${b.kind === 'ETF' ? 'part' : b.kind === 'Crypto' ? '' : 'action'}${b.amt / qq >= 2 && b.kind !== 'Crypto' ? 's' : ''} au cours du jour` : ''}${b.m < M ? ` · prévu en ${MONTHS_L[b.m]}` : ''}`, fn: () => openExecuteBuyModal(b) });
   });
-  pendProv(Y).forEach(({ p, m }) => out.push({ t: `Mettre de côté ${nE(p.amt)}`, s: `${envN(p.env)} · ${p.name}${m < M ? ` · ${MONTHS_L[m]}` : ''}`, fn: () => applyProv(p, m, Y) }));
+  pendProv(Y).forEach(({ p, m }) => out.push({ late: m < M, t: `Mettre de côté ${nE(p.amt)}`, s: `${envN(p.env)} · ${p.name}${m < M ? ` · ${MONTHS_L[m]}` : ''}`, fn: () => applyProv(p, m, Y) }));
   return out;
 }
 function M_Q(sym) { const x = M.q ? M.q[sym] : null; if (!x || x.price == null) return null; const r = x.currency === 'EUR' ? 1 : (M.fx || {})[x.currency]; return r ? x.price * r : null; }
@@ -8799,7 +8800,6 @@ function vToday() {
   const K = keyFigures(), now = new Date(), box = h('div', { class: 'n-view' });
   const wzr = wzResumeCard(); if (wzr) box.append(wzr);
   box.append(nKick(`Bonjour · ${MONTHS_L[now.getMonth()]} ${now.getFullYear()}`));
-  const todo = S.envs.length ? (startCard() || todoCard()) : null; if (todo) box.append(todo);
   if (!S.envs.length) {
     box.append(h('div', { class: 'n-card', style: 'text-align: center; padding: 26px 18px;' }, h('div', { class: 'n-h1', style: 'font-size: 24px;' }, 'Votre boule de neige vous attend'),
       h('p', { class: 'n-sub', style: 'margin: 8px 0 16px;' }, 'Répondez à quelques questions simples : snowball construit votre tableau de bord.'),
@@ -8824,12 +8824,14 @@ function vToday() {
   countUp(hero.querySelector('.n-big'), K.net);
 
   // Ce mois-ci
-  const items = monthPlan();
+  // Ce mois-ci : seulement le mois en cours ; ce qui est en retard tient sur une ligne
+  const all = monthPlan(), items = all.filter(x => !x.late), late = all.length - items.length;
   box.append(nWh('Ce mois-ci', 'var(--ch4)'));
-  box.append(items.length ? nTight(...items.slice(0, 6).map(x => h('div', { class: 'n-todo' + (x.done ? ' done' : ''), style: '--cc: var(--ch4);' },
-      h('span', { class: 'n-ck' }, x.done ? '✓' : ''), h('div', { class: 'n-tt' }, h('b', null, x.t), h('span', null, x.s)),
-      x.fn ? h('button', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: x.fn }, 'Valider') : null)),
-      items.length > 6 ? h('button', { class: 'n-more', onclick: () => go('#/s/d') }, `Voir les ${items.length - 6} autres`) : null)
+  const rows = items.map(x => h('div', { class: 'n-todo' + (x.done ? ' done' : ''), style: '--cc: var(--ch4);' },
+    h('span', { class: 'n-ck' }, x.done ? '✓' : ''), h('div', { class: 'n-tt' }, h('b', null, x.t), h('span', null, x.s)),
+    x.fn ? h('button', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: x.fn }, 'Valider') : null));
+  if (late) rows.push(nRow({ t: `${late} opération${late > 1 ? 's' : ''} des mois passés`, s: 'À valider ou à retirer dans Mon plan', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Voir') }));
+  box.append(rows.length ? nTight(...rows)
     : nTight(nRow({ t: 'Rien de prévu ce mois-ci', s: 'Programmez vos achats et mises de côté du mois.', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Mon plan') })));
 
   // Pourquoi ça a bougé
@@ -8837,24 +8839,29 @@ function vToday() {
   if (P && (S.hist || []).length > 3) {
     const rows = [['Votre épargne', P.save, 'var(--ch4)'], ['Les marchés', P.mk, 'var(--ch1)'], ['Intérêts et dividendes', P.inc, 'var(--c1)'], ['Frais', P.fee, 'var(--down)']];
     if (Math.abs(P.jumps) >= 1) rows.push(['Comptes ajoutés ou retirés', P.jumps, 'var(--muted-light)']);
-    const mx = Math.max(1, ...rows.map(r => Math.abs(r[1])));
     box.append(nWh('Pourquoi ça a bougé', 'var(--ch1)', '30 derniers jours'));
-    box.append(nCard(h('div', { class: 'n-why' }, ...rows.flatMap(([k, v, c]) => [h('span', null, h('i', { style: `width: ${Math.max(4, Math.abs(v) / mx * 70).toFixed(0)}px; background: ${c};` }), k), h('b', { class: v >= 0 ? 'n-pos' : 'n-neg' }, sE(v))])),
+    box.append(nCard(h('div', { class: 'n-why' }, ...rows.flatMap(([k, v, c]) => [h('span', null, h('i', { style: `width: 4px; background: ${c};` }), k), h('b', { class: v >= 0 ? 'n-pos' : 'n-neg' }, sE(v))])),
       nSub(P.delta > 0 && P.save > P.delta / 2 ? 'Plus de la moitié de la hausse vient de votre effort. 👏' : P.mk >= 0 ? 'Les marchés vous ont porté ce mois-ci.' : 'Les marchés ont baissé : votre épargne amortit la chute.'),
-      nMore(sheetWhy)));
+    ));
   }
 
-  // Santé financière
-  const D = healthData();
-  if (D) {
-    const col = D.score >= 70 ? 'var(--up)' : D.score >= 40 ? 'var(--warn)' : 'var(--down)';
-    const g = h('div', { class: 'n-health' }); g.innerHTML = gaugeH(D.score, col, 84);
-    g.append(h('div', { class: 'n-dots' }, ...D.cr.map(c => h('span', null, h('i', { style: `background: ${c.p >= 18 ? 'var(--up)' : c.p >= 8 ? 'var(--warn)' : 'var(--down)'};` }), c.n.replace('Taux d’épargne', 'Épargne')))));
-    box.append(nWh('Santé financière', 'var(--up)'));
-    box.append(nCard(g, D.weak.p < 25 ? h('div', { class: 'n-hint' }, h('b', null, 'À regarder : '), D.weak.tip) : null, nMore(sheetHealth)));
-  }
-  const tb = S.tipOn ? tipBanner() : null; if (tb) { tb.style.marginTop = '16px'; box.append(tb); }
+  // À regarder : une seule alerte, la plus utile
+  const al = homeAlert();
+  if (al) box.append(nWh('À regarder', 'var(--warn)'), nTight(nRow({ lead: h('span', { class: 'n-d', style: 'background: var(--warn-light); color: var(--warn);' }, '!'), t: al.t, s: al.s, onclick: al.fn, vs: h('span', { class: 'n-pill' }, al.b) })));
   return box;
+}
+
+// L'alerte de l'Accueil : d'abord ce qui manque, sinon le point faible de la santé financière
+function homeAlert() {
+  const e = S.envs.find(x => !envDone(x));
+  if (e) return { t: e.name, s: envTodo(e), b: 'Compléter', fn: () => go('#/e/' + e.id) };
+  if (!(getBudget().rev > 0)) return { t: 'Votre budget du mois', s: 'Sans revenus ni dépenses, snowball ne peut pas calculer votre épargne possible.', b: 'Renseigner', fn: () => go('#/n') };
+  // Seulement un vrai point rouge (l'endettement n'alerte qu'à partir d'environ 31 % des revenus)
+  const D = healthData(); if (!D) return null;
+  const w = D.cr.filter(c => c.n === 'Endettement' ? c.p <= 3 : c.p < 8).sort((x, y) => x.p - y.p)[0];
+  if (!w) return null;
+  const tab = ['Frais', 'Précaution', 'Taux d’épargne'].includes(w.n) ? '#/n' : '#/a';
+  return { t: w.n, s: w.tip, b: 'Voir', fn: () => go(tab) };
 }
 
 /* ---------- MA BOULE (projection) ---------- */
