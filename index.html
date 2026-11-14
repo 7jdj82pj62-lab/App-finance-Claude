@@ -1308,6 +1308,16 @@ button, a, label, .row-item, .wz-choice, .wz-chip, .chip-btn, .btn, .onb-tile { 
 .n-kv b.n-neg { color: var(--down); }
 .n-kv b .n-pos { color: var(--up); } .n-kv b .n-neg { color: var(--down); }
 .n-row-go { color: var(--muted-light); flex: none; display: flex; }
+.n-buds { margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--border); }
+.n-bud { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 10px 0; border-bottom: 1px solid var(--border); color: inherit; font: inherit; cursor: pointer; }
+.n-bud-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
+.n-bud-h span { font-weight: 600; }
+.n-bud-h em { display: block; font-style: normal; font-weight: 400; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.n-bud-h b { font-weight: 600; white-space: nowrap; }
+.n-amt-w { display: flex; align-items: center; gap: 4px; flex: none; }
+.n-row .n-tt { flex: 1; min-width: 0; }
+.n-amt-w input.n-amt { width: 92px; min-width: 0; flex: none; }
+.n-amt { width: 88px; text-align: right; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-alt); font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); }
 .n-card > .n-kv:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .n-kv > .n-eq { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
 .n-kv > .n-eq span { color: var(--ink); font-weight: 600; }
@@ -9064,19 +9074,99 @@ function vCredit(id) {
 /* ---------- MES COÛTS ---------- */
 function vCosts() {
   const K = keyFigures(), B = K.B, L = leakData();
-  const box = h('div', { class: 'n-view', style: '--cc: var(--ch2); --cl: var(--ch2-l);' }, nHead('Qu’est-ce qui me coûte, et combien il me reste ?', 'Mes coûts'));
-  box.append(nWh('Où part votre argent chaque mois'));
-  if (B.rev > 0) box.append(h('div', { class: 'n-card' }, h('div', { class: 'n-sankey' }, budgetSankey(B, K)), nMore(sheetBudget)));
-  else box.append(nTight(nRow({ t: 'Renseignez votre budget', s: 'Revenus et dépenses du mois, en 2 minutes.', onclick: () => go('#/u'), vs: h('span', { class: 'n-pill' }, 'Commencer') })));
-  if (L.items.length) {
-    box.append(nWh('Ce qui fait fondre votre boule', 'var(--down)', 'Sur 20 ans'));
-    box.append(nTight(...L.items.map(x => nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)' }))));
-    box.append(nMore(sheetLeaks));
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch2); --cl: var(--ch2-l);' }, nHead('Combien ça me coûte, combien il me reste ?', 'Mes coûts'));
+
+  // 1. Le budget du mois
+  box.append(nWh('Votre mois'));
+  if (!(B.rev > 0)) {
+    box.append(nTight(nRow({ t: 'Combien gagnez-vous par mois ?', s: 'Vos revenus nets : c’est le point de départ pour calculer votre épargne possible.', onclick: () => openRevenueEditModal(B), vs: h('span', { class: 'n-pill' }, 'Renseigner') })));
+  } else {
+    const gs = Object.entries(B.groups).map(([gk, g]) => ({ gk, g, v: totalGroupSpend(g) })).sort((x, y) => y.v - x.v);
+    const cap = K.cap;
+    box.append(nCard(
+      nKick(cap >= 0 ? 'Il vous reste chaque mois' : 'Il vous manque chaque mois', cap >= 0 ? 'var(--up)' : 'var(--down)'),
+      h('div', { class: 'n-big num', style: cap < 0 ? 'color: var(--down);' : null }, nE(Math.abs(cap))),
+      nSub(cap >= 0 ? 'C’est votre épargne possible : ce que vous pouvez placer ou garder pour vos projets.' : 'Vos dépenses dépassent vos revenus : regardez les plus gros postes.'),
+      h('div', { class: 'n-buds' },
+        h('button', { class: 'n-bud n-bud-rev', onclick: () => openRevenueEditModal(B) }, h('div', { class: 'n-bud-h' }, h('span', null, 'Revenus'), h('b', { class: 'num n-pos' }, '+ ' + nE(B.rev)))),
+        ...gs.map(({ gk, g, v }) => h('button', { class: 'n-bud', onclick: () => go('#/n/c/' + gk) },
+          h('div', { class: 'n-bud-h' }, h('span', null, g.name, v ? h('em', null, `${P0.format(v / B.rev)} des revenus`) : h('em', null, 'à renseigner')), h('b', { class: 'num' }, v ? '− ' + nE(v) : '—')),
+          v ? h('div', { class: 'n-bar', style: 'margin-top: 6px;' }, h('i', { style: `width: ${Math.min(100, v / B.rev * 100).toFixed(1)}%; background: var(--ch2);` })) : null)),
+        K.prov > 0 ? h('button', { class: 'n-bud', onclick: () => go('#/s') }, h('div', { class: 'n-bud-h' }, h('span', null, 'Mises de côté prévues', h('em', null, 'dans Mon plan')), h('b', { class: 'num' }, '− ' + nE(K.prov)))) : null),
+      h('button', { class: 'n-more', onclick: () => openGroupModal(B) }, 'Ajouter une catégorie')));
+
+    // 2. Les grosses dépenses de l'année
+    const bills = (B.annualBills || []).slice().sort((x, y) => (x.dueMonth || 0) - (y.dueMonth || 0));
+    const bt = bills.reduce((t, x) => t + x.amt, 0);
+    box.append(nWh('Les grosses dépenses de l’année', null, bt ? nE(bt) : null));
+    box.append(nTight(...bills.map(x => nRow({ t: x.name, s: `en ${MONTHS_L[x.dueMonth || 0]}`, v: nE(x.amt), onclick: () => billModal(B, x) })),
+      bills.length ? nSub(`Soit ≈ ${nE(bt / 12)} par mois à mettre de côté pour ne pas être pris de court.`) : null,
+      h('button', { class: 'n-more', onclick: () => billModal(B) }, bills.length ? 'Ajouter une dépense' : 'Taxe foncière, assurance, impôts… Ajoutez-les')));
   }
-  box.append(nWh('Tout le détail'),
-    nDetail('Frais, impôts et crédits', 'par compte, par crédit, simulateur de frais', '#/n/d'),
-    nDetail('Budget du mois', 'revenus, dépenses, grosses dépenses de l’année', '#/u'));
-  box.append(nNote('Repères pédagogiques, pas des conseils en investissement.'));
+
+  // 3. Ce que coûte votre patrimoine sur 20 ans
+  const rows = [];
+  S.envs.map(e => ({ e, f: fees(e) })).filter(x => x.f > 0.5).sort((x, y) => y.f - x.f)
+    .forEach(({ e, f }) => rows.push({ ico: '%', t: `Frais · ${e.name}`, s: `${nE(f)} par an`, v: f * (Math.pow(1.04, 20) - 1) / 0.04, fn: () => go('#/e/' + e.id) }));
+  L.items.filter(x => x.ico !== '%').forEach(x => rows.push(Object.assign({}, x, { fn: x.ico === '⌂' || x.ico === '§' ? () => go('#/a') : null })));
+  if (rows.length) {
+    const tot = rows.reduce((t, x) => t + x.v, 0);
+    box.append(nWh('Ce que coûte votre patrimoine', 'var(--down)'));
+    box.append(nTight(h('div', { class: 'n-sub', style: 'padding: 12px 0 4px;' }, 'Sur 20 ans, au total : ', h('b', { style: 'color: var(--down);' }, '− ' + kE(tot))),...rows.sort((x, y) => y.v - x.v).map(x => nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)', onclick: x.fn || null }))),
+      nNote('Cumul sur 20 ans, avec l’hypothèse d’un placement à 4 % par an. Repères pédagogiques, pas des conseils en investissement.'));
+  }
+  return box;
+}
+
+// Ajouter, modifier ou supprimer une grosse dépense de l'année
+function billModal(B, bill) {
+  const root = $('#modal-root'), close = () => { root.innerHTML = ''; };
+  const nameIn = h('input', { type: 'text', placeholder: 'ex. Taxe foncière', value: bill ? bill.name : '' });
+  const amtIn = h('input', { type: 'text', inputmode: 'decimal', placeholder: 'ex. 1200', value: bill ? String(bill.amt).replace('.', ',') : '' });
+  const monthSel = h('select', null, ...MONTHS_L.map((m, i) => h('option', { value: i, selected: bill && (bill.dueMonth || 0) === i ? true : null }, m)));
+  const modal = h('div', { class: 'modal-overlay', onclick: ev => { if (ev.target === modal) close(); } },
+    h('div', { class: 'modal-sheet', style: 'max-width: 460px;' },
+      h('div', { class: 'modal-header' }, h('div', { class: 'modal-title' }, bill ? 'Modifier la dépense' : 'Nouvelle grosse dépense'), h('button', { class: 'btn-icon-only', onclick: close }, getIcon('x', 16))),
+      h('div', { class: 'modal-body form-grid' },
+        h('div', { class: 'form-group full-col' }, h('label', { class: 'form-label' }, 'Nom'), nameIn),
+        h('div', { class: 'form-group' }, h('label', { class: 'form-label' }, 'Montant sur l’année (€)'), amtIn),
+        h('div', { class: 'form-group' }, h('label', { class: 'form-label' }, 'Mois'), monthSel),
+        bill ? h('div', { class: 'full-col' }, h('button', { class: 'btn btn-danger btn-full', onclick: () => { B.annualBills = B.annualBills.filter(x => x !== bill); save(); close(); toast('Dépense supprimée'); render(); } }, getIcon('trash', 15), 'Supprimer cette dépense')) : null),
+      h('div', { class: 'modal-footer' }, h('button', { class: 'btn btn-secondary', onclick: close }, 'Annuler'),
+        h('button', { class: 'btn btn-primary', onclick: () => {
+          const nm = nameIn.value.trim(), a = pf(amtIn.value);
+          if (!nm) { nameIn.focus(); return; } if (!(a > 0)) { amtIn.focus(); return; }
+          if (bill) Object.assign(bill, { name: nm, amt: a, dueMonth: +monthSel.value });
+          else (B.annualBills = B.annualBills || []).push({ id: uid(), name: nm, amt: a, dueMonth: +monthSel.value });
+          save(); close(); render();
+        } }, 'Enregistrer'))));
+  root.replaceChildren(modal);
+  setTimeout(() => nameIn.focus(), 50);
+}
+
+/* ---------- PAGE D'UNE CATÉGORIE DE DÉPENSES ---------- */
+function vBudgetGroup(gk) {
+  const B = getBudget(), g = B.groups[gk];
+  if (!g) { setTimeout(() => go('#/n')); return h('div'); }
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch2); --cl: var(--ch2-l);' }, nBack('#/n', 'Mes coûts'), nHead('Dépenses du mois', g.name));
+  const totB = h('div', { class: 'n-big num' }, nE(totalGroupSpend(g)));
+  const refresh = () => { totB.textContent = nE(totalGroupSpend(g)); };
+  box.append(nCard(nKick('Total par mois'), totB, nSub('Touchez un montant pour le modifier. Il est enregistré aussitôt.')));
+  box.append(nWh('Postes', null, `${g.items.length}`));
+  box.append(nTight(...g.items.map(it => {
+      const inp = h('input', { class: 'n-amt num', type: 'text', inputmode: 'decimal', value: it.amt ? String(it.amt).replace('.', ',') : '', placeholder: '0', 'aria-label': 'Montant de ' + it.name });
+      inp.onchange = () => {
+        const raw = inp.value.replace(/[\s\u00a0\u202f€]/g, '');
+        if (raw === '') it.amt = 0;
+        else if (!/^\d+([.,]\d{1,2})?$/.test(raw)) { inp.value = it.amt ? String(it.amt).replace('.', ',') : ''; toast('Montant non valide : chiffres uniquement, ex. 1 250 ou 39,90'); return; }
+        else it.amt = parseFloat(raw.replace(',', '.'));
+        save(); refresh();
+      };
+      const del = h('button', { class: 'btn-icon-only', 'aria-label': 'Supprimer ' + it.name, onclick: () => { g.items = g.items.filter(x => x !== it); save(); render(); } }, getIcon('x', 15));
+      return h('div', { class: 'n-row' }, h('div', { class: 'n-tt' }, h('b', null, it.name)), h('label', { class: 'n-amt-w' }, inp, h('span', null, '€')), del);
+    }),
+    h('button', { class: 'n-more', onclick: () => openAddBudgetItemModal(g) }, 'Ajouter un poste')));
+  box.append(nTight(nRow({ t: 'Renommer ou supprimer la catégorie', onclick: () => openGroupModal(B, gk) })));
   return box;
 }
 
@@ -9169,11 +9259,10 @@ function render() {
     'c': () => vClass(r[1]),
     'e': () => vAccount(r[1]),
     'l': () => vLine(r[1], r[2]),
-    'n': () => r[1] === 'd' ? withTop(nBack('#/n', 'Mes coûts'), vNet()) : vCosts(),
+    'n': () => r[1] === 'c' ? vBudgetGroup(r[2]) : vCosts(),
     's': () => r[1] === 'd' ? withTop(nBack('#/s', 'Mon plan'), vStrat()) : vPlan(),
     'g': () => r[1] === 'd' ? withTop(nBack('#/g', 'Mes projets'), vGoalsR()) : r[1] ? vGoalsR(r[1]) : vProjects(),
-    'u': () => withTop(nBack('#/n', 'Mes coûts'), vTools()),
-    'r': vRent
+    'u': vCosts
   };
 
   const currentView = views[k] || vHome;
