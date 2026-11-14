@@ -1,9 +1,25 @@
 # Journal des modifications
 
-## Point de départ de la refonte (14/11/2026)
-`index.html` est remplacé par la version la plus récente de l'appli (« Claude_code_20 », versions 2 à 18 du journal tenu hors dépôt). C'est la base de la refonte : on garde les données, les calculs et le questionnaire de départ, et on reconstruit l'interface qui suit le questionnaire.
+## Version 19 : refonte de l'appli après le questionnaire (14/11/2026)
+On garde les données, les calculs et le questionnaire de départ ; tout ce qui vient après est reconstruit sur une seule interface. Règles : 5 onglets, deux niveaux au plus (l'onglet, puis la page d'un élément), un chiffre à un seul endroit, on modifie là où on voit. Il n'y a plus de « Tout le détail », de fenêtres « En savoir plus » ni d'ancienne interface cachée.
 
-Attention : `tests/parcours-accueil.e2e.js` date de la version 1. Les tests de la version 18 (170/170) ne sont pas dans le dépôt.
+- **Accueil** (« Où j'en suis ? ») : la boule de neige (net, 30 jours, 12 mois, courbe), Ce mois-ci (seulement le mois en cours ; les mois passés tiennent sur une ligne), Pourquoi ça a bougé, et au plus une alerte « À regarder » (compte incomplet, budget manquant ou vrai point rouge).
+- **Mon argent** : ce que vous avez − crédits − impôts = net ; répartition actuelle et visée dans un seul bloc ; comptes ; crédits (immobiliers et autres, auparavant cachés). Nouvelles pages **Compte** (`#/e/…`), **Ligne** (`#/l/…`) et **Crédit** (`#/k/…`, coût total).
+- **Mes coûts** : épargne possible en grand, revenus et catégories en barres ; page **Catégorie** (`#/n/c/…`) où chaque montant se modifie sur place ; grosses dépenses de l'année (ajout, modification, suppression) ; ce que coûte le patrimoine sur 20 ans, compte par compte.
+- **Mes projets** : prochain objectif, liste, « Est-ce que ça passe ? » ; page **Projet** (`#/g/…`) avec l'effort mensuel, les comptes qui financent, modifier et supprimer. Calcul toujours net d'impôts.
+- **Mon plan** : 2026 / 2027, l'année en colonnes ; page **Mois** (`#/s/m/année/mois`) avec Fait / Pas fait / Retirer ; mois passés regroupés (« Tous faits » / « Aucun ») ; « Arrêter » une série. Programmer un achat ou une mise de côté ouvre les écrans du questionnaire (recherche du titre, cours du jour). Une mise de côté « Pas faite » (`S.st[année].px`) n'est plus comptée comme épargnée.
+- **Bouton +** : une liste par rubrique (compte, ligne, crédit, grosse dépense, projet, achat, mise de côté).
+- **Réglages** : apparence en premier, puis questionnaire, inflation, données, cours en direct. Conseil du jour et médailles supprimés.
+- **Supprimés** : anciens écrans Patrimoine, Frais, Budget, Objectifs, Stratégie, Santé, Classe, Louer ou acheter, simulateurs de frais et d'intérêts composés, calculateur Livret A, questionnaire express, diagramme de flux. 75 fonctions et 3 100 lignes retirées (9 319 → 6 224 lignes).
+- **Saisie stricte** des montants dans les nouvelles pages : « 12abc » est refusé avec un message, l'ancienne valeur est gardée.
+- **Données** : aucune migration. Seul ajout : `px` (mises de côté non faites) dans `S.st[année]`, facultatif.
+
+Tests : `node tests/appli.e2e.js` : **69/69** (questionnaire complet écran par écran, reprise, tous les écrans à 320 px, saisies, calculs, bouton +, persistance, thème sombre, aucune erreur JS). Il remplace `tests/parcours-accueil.e2e.js`, qui datait de la version 1. Captures : `node tests/capture.js <dossier> '#/a' …` avec les données de `tests/demo-data.js`.
+
+Non testé : cours en direct réels (le relais Google n'est pas joignable depuis l'environnement de test), Safari / iPhone réel, lecteur d'écran.
+
+## Point de départ de la refonte (14/11/2026)
+`index.html` est remplacé par la version la plus récente de l'appli (« Claude_code_20 », versions 2 à 18 du journal tenu hors dépôt).
 
 ---
 

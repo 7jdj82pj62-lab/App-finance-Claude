@@ -13,7 +13,7 @@ module.exports = function demoState() {
   };
   return {
     envs: [
-      { id: 'av1', type: 'av', name: 'Assurance vie Linxea', avRate: 2.5, fee: 0.5, lines: [{ id: 'l1', name: 'Fonds euros', val: 42000, cst: 38000, divs: [] }, { id: 'l2', name: 'ETF Monde (UC)', val: 18500, cst: 14000, divs: [], fee: 0.3 }] },
+      { id: 'av1', type: 'av', name: 'Assurance vie Linxea', avRate: 2.5, fee: 0.5, lines: [{ id: 'l1', name: 'Fonds euros', val: 42000, cst: 38000, divs: [] }, { id: 'l2', name: 'ETF Monde (UC)', val: 18500, cst: 14000, divs: [], fee: 0.3 }, { id: 'l7', m: 1, sym: 'TTE.PA', name: 'TotalEnergies', kind: 'Action', qty: 40, cost: 52.3, divs: [{ id: 'd1', d: Y + '-04-02', amt: 31.6 }] }] },
       { id: 'la1', type: 'la', name: 'Livret A', lines: [{ id: 'l3', name: 'Solde', val: 12000, cst: 12000, divs: [] }] },
       { id: 'es1', type: 'es', name: 'PEE', plan: 'pee', fee: 0.8, lines: [{ id: 'l4', name: 'Fonds actions', val: 9500, cst: 7000, divs: [] }] },
       { id: 'im1', type: 'im', name: 'Appartement', tax: 0, lines: [{ id: 'l5', name: 'Appartement Lyon', val: 210000, cst: 190000, divs: [], loan: { amt: 160000, rate: 3.2, yrs: 20, start: (Y - 4) + '-03', ins: 30 } }] },
