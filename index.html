@@ -1318,6 +1318,11 @@ button, a, label, .row-item, .wz-choice, .wz-chip, .chip-btn, .btn, .onb-tile { 
 .n-row .n-tt { flex: 1; min-width: 0; }
 .n-amt-w input.n-amt { width: 92px; min-width: 0; flex: none; }
 .n-amt { width: 88px; text-align: right; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-alt); font: inherit; font-size: 15px; font-weight: 600; color: var(--ink); }
+.n-years { display: flex; gap: 8px; margin: 2px 0 14px; }
+.n-years button { padding: 7px 16px; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); font: inherit; font-weight: 600; font-size: 14px; color: var(--ink-secondary); cursor: pointer; }
+.n-years button.on { background: var(--ch4); border-color: var(--ch4); color: #fff; }
+.n-acts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.n-two { display: grid; gap: 0; }
 .n-card > .n-kv:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .n-kv > .n-eq { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
 .n-kv > .n-eq span { color: var(--ink); font-weight: 600; }
@@ -4356,7 +4361,7 @@ function pendProv(y) {
   const T = getStrategy(y), last = y < nowYear() ? 11 : y === nowYear() ? nowMonth() : -1, o = [];
   T.p.forEach(p => {
     for (let m = p.f || 0; m <= last; m++) {
-      if (!(T.pd[m] || []).includes(p.id)) o.push({ p, m });
+      if (!(T.pd[m] || []).includes(p.id) && !((T.px || {})[m] || []).includes(p.id)) o.push({ p, m });
     }
   });
   return o;
@@ -6833,6 +6838,7 @@ const WZ_NAMES = { pea: 'PEA', cto: 'Compte-titres', av: 'Assurance vie', la: 'L
 const WZ_DESC = { pea: 'Actions et ETF', cto: 'Bourse sans plafond', av: 'Fonds euros, UC', la: 'Épargne disponible', lj: 'LDDS, LEP, Livret jeune', crypto: 'Bitcoin, Ethereum…', es: 'PEE, PERCO', cf: 'Prêts en ligne', im: 'Maison, appartement', au: 'Or, véhicule, parts…' };
 const WZ_GOAL_IC = { 'Résidence principale': 'home', 'Mariage': 'heart', 'Enfant(s)': 'smile', 'Voiture': 'car', 'Retraite': 'sun', 'Voyage': 'plane', 'Autre': 'star' };
 let WZ_OPEN = false;
+let WZ_SOLO = null; // { at } : parcours ouvert depuis Mon plan pour un seul ajout
 let wzSaveOk = true;
 let wzRefreshAt = 0;
 const WZ_DRAFT = {}; // saisies et sous-étapes en cours (conservées quand une fenêtre s'ouvre par-dessus)
@@ -7066,6 +7072,7 @@ function openWizard(at) {
 
 function closeWizard(finish) {
   const W = wzState();
+  if (WZ_SOLO) { W.at = WZ_SOLO.at; WZ_SOLO = null; WZ_DRAFT.plan = null; finish = false; }
   W.open = false;
   if (finish) { W.done = true; S.onbDone = true; }
   wzSave();
@@ -8061,7 +8068,7 @@ const WZ_STEPS = {
     const hasPlan = [y0, y0 + 1].some(y => S.st && S.st[y] && (S.st[y].b.length || S.st[y].p.length));
     const P = WZ_DRAFT.plan = WZ_DRAFT.plan || { stage: hasPlan || !mEnvs.length ? 'list' : 'asset', y: y0 };
     const D = P.d = P.d || { name: '', sym: '', kind: 'ETF', env: (mEnvs[0] || {}).id, amt: null, start: 'now', next: true };
-    const stage = s => { P.stage = s; wzDraw(true); };
+    const stage = s => { if (s === 'list' && WZ_SOLO) return closeWizard(); P.stage = s; wzDraw(true); };
 
     if (P.stage === 'asset') {
       const held = [];
@@ -8074,10 +8081,10 @@ const WZ_STEPS = {
           held.length ? wzChoices(held.map(o => ({ ic: 'trending-up', t: o.name, d: o.kind, col: 'ch4', arrow: true, fn: () => pickA(o) }))) : null,
           h('button', { class: 'wz-new', onclick: () => { P.sq = ''; P.res = null; stage('nsearch'); } }, getIcon('plus', 18), 'Nouveau titre')
         ],
-        onBack: hasPlan ? () => stage('list') : null,
-        skip: hasPlan ? null : 'Je verrai plus tard',
+        onBack: hasPlan || WZ_SOLO ? () => stage('list') : null,
+        skip: hasPlan || WZ_SOLO ? null : 'Je verrai plus tard',
         skipFn: () => stage('list'),
-        next: hasPlan ? { label: 'Voir mon plan', fn: () => stage('list') } : { hidden: true }
+        next: hasPlan && !WZ_SOLO ? { label: 'Voir mon plan', fn: () => stage('list') } : { hidden: true }
       };
     }
     if (P.stage === 'nsearch') {
@@ -8114,7 +8121,8 @@ const WZ_STEPS = {
         const push = (y, from) => { const T = getStrategy(y); for (let m = from; m <= 11; m++) T.b.push({ id: uid(), m, sym, name: nm, env: D.env, amt: D.amt, done: null, kind: D.kind || undefined }); };
         push(ys, ms);
         if (ys === y0 && D.next) push(y0 + 1, 0);
-        P.d = null; P.stage = 'list'; P.y = ys; wzSave(); wzDraw(true);
+        P.d = null; if (WZ_SOLO) { closeWizard(); toast('Ajouté à votre plan'); return; }
+        P.stage = 'list'; P.y = ys; wzSave(); wzDraw(true);
       };
       return {
         kicker: D.name + (D.price != null ? ` · cours actuel ${D.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} ${D.cur === 'EUR' || !D.cur ? '€' : D.cur}` : ''),
@@ -8149,7 +8157,8 @@ const WZ_STEPS = {
         next: { label: 'Programmer', fn: () => {
           if (!(Q.amt > 0)) { err.textContent = 'Indiquez un montant par mois.'; return; }
           getStrategy(y0).p.push({ id: uid(), name: Q.name, amt: Q.amt, env: Q.env, f: m0 });
-          P.q = null; P.stage = 'list'; P.y = y0; wzSave(); wzDraw(true);
+          P.q = null; if (WZ_SOLO) { closeWizard(); toast('Ajouté à votre plan'); return; }
+          P.stage = 'list'; P.y = y0; wzSave(); wzDraw(true);
         } }
       };
     }
@@ -8846,7 +8855,7 @@ function vToday() {
   box.append(nWh('Ce mois-ci', 'var(--ch4)'));
   const rows = items.map(x => h('div', { class: 'n-todo' + (x.done ? ' done' : ''), style: '--cc: var(--ch4);' },
     h('span', { class: 'n-ck' }, x.done ? '✓' : ''), h('div', { class: 'n-tt' }, h('b', null, x.t), h('span', null, x.s)),
-    x.fn ? h('button', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: x.fn }, 'Valider') : null));
+    x.fn ? h('button', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: x.fn }, 'Fait') : null));
   if (late) rows.push(nRow({ t: `${late} opération${late > 1 ? 's' : ''} des mois passés`, s: 'À valider ou à retirer dans Mon plan', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Voir') }));
   box.append(rows.length ? nTight(...rows)
     : nTight(nRow({ t: 'Rien de prévu ce mois-ci', s: 'Programmez vos achats et mises de côté du mois.', onclick: () => go('#/s'), vs: h('span', { class: 'n-pill', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, 'Mon plan') })));
@@ -9246,42 +9255,125 @@ function vProject(id) {
 const B_ok = () => getBudget().rev > 0;
 
 /* ---------- MON PLAN ---------- */
-function vPlan() {
-  const K = keyFigures(), Y = nowYear(), M = nowMonth(), T = getStrategy(Y), B = K.B;
+// Programmer un achat ou une mise de côté avec les écrans du questionnaire
+function planAdd(kind) {
+  if (kind === 'buy' && !S.envs.some(e => TYPES[e.type].m || TYPES[e.type].mx)) { openAlertModal('Il faut d’abord un compte', 'Ajoutez un PEA, un compte-titres, une assurance vie ou des cryptos pour y programmer des achats.'); return; }
+  if (kind === 'prov' && !S.envs.some(e => !TYPES[e.type].m)) { openAlertModal('Il faut d’abord un compte', 'Ajoutez un livret pour y mettre de l’argent de côté.'); return; }
+  WZ_SOLO = { at: wzState().at };
+  WZ_DRAFT.plan = { stage: kind === 'prov' ? 'prov' : 'asset', y: nowYear() };
+  openWizard('s-plan');
+}
+const provSkip = (T, m, p) => { T.px = T.px || {}; (T.px[m] = T.px[m] || []).push(p.id); save(); render(); };
+const provState = (T, m, p) => (T.pd[m] || []).includes(p.id) ? 'done' : ((T.px || {})[m] || []).includes(p.id) ? 'skip' : 'todo';
+const envNm = id => (S.envs.find(e => e.id === id) || { name: 'compte supprimé' }).name;
+const nAct = (label, fn, style) => h('button', { class: 'n-pill', style: style || '--cc: var(--ch4); --cl: var(--ch4-l);', onclick: ev => { ev.stopPropagation(); fn(); } }, label);
+const nGhost = (label, fn) => nAct(label, fn, '--cc: var(--muted); --cl: var(--surface-alt);');
+// Confirmer plusieurs mois d'une mise de côté d'un coup : faits (l'argent est ajouté au compte) ou pas faits
+function provMany(T, p, ms, done, Y) {
+  const e = S.envs.find(x => x.id === p.env);
+  if (done && e) {
+    const nm = 'Provision · ' + p.name; let l = e.lines.find(x => !x.m && x.name === nm);
+    if (!l) { l = { id: uid(), name: nm, val: 0, cst: 0, divs: [] }; e.lines.push(l); }
+    ms.forEach(m => { l.val += p.amt; l.cst += p.amt; (T.pd[m] = T.pd[m] || []).push(p.id); });
+    toast(`${nE(p.amt * ms.length)} ajoutés sur « ${e.name} »`);
+  } else { T.px = T.px || {}; ms.forEach(m => (T.px[m] = T.px[m] || []).push(p.id)); toast(`${ms.length} mois marqués « pas fait »`); }
+  save(); render();
+}
+function removeBuy(T, b) { T.b = T.b.filter(z => z !== b); save(); toast('Achat retiré du plan'); render(); }
+
+function vPlan(year) {
+  const K = keyFigures(), Y0 = nowYear(), M = nowMonth(), Y = year || Y0, T = getStrategy(Y), B = K.B;
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, nHead('Comment j’y arrive ?', 'Mon plan'));
-  box.append(nWh(`Votre année ${Y}`, null, 'Détail', () => go('#/s/d')));
+  box.append(h('div', { class: 'n-years' }, ...[Y0, Y0 + 1].map(y => h('button', { class: y === Y ? 'on' : '', onclick: () => go(y === Y0 ? '#/s' : '#/s/' + y) }, String(y)))));
+
+  // 1. L'année en colonnes
+  const cur = m => Y < Y0 || (Y === Y0 && m < M) ? 'past' : Y === Y0 && m === M ? 'now' : '';
   const months = MONTHS_S.map((_, m) => {
-    const buys = T.b.filter(b => b.m === m), provs = T.p.filter(p => m >= (p.f || 0));
+    const buys = T.b.filter(b => b.m === m), provs = T.p.filter(p => m >= (p.f || 0) && provState(T, m, p) !== 'skip');
     const bills = (B.annualBills || []).filter(b => (b.dueMonth || 0) === m).reduce((t, b) => t + b.amt, 0);
-    const done = buys.filter(b => b.done).reduce((t, b) => t + b.amt, 0) + provs.filter(p => (T.pd[m] || []).includes(p.id)).reduce((t, p) => t + p.amt, 0);
-    const all = buys.reduce((t, b) => t + b.amt, 0) + provs.reduce((t, p) => t + p.amt, 0);
+    const done = buys.filter(b => b.done).reduce((t, b) => t + (b.done.e || b.amt), 0) + provs.filter(p => provState(T, m, p) === 'done').reduce((t, p) => t + p.amt, 0);
+    const all = buys.reduce((t, b) => t + (b.done ? b.done.e || b.amt : b.amt), 0) + provs.reduce((t, p) => t + p.amt, 0);
     return { done, todo: all - done, bills };
   });
   const cap = Math.max(0, K.cap), mx = Math.max(1, cap, ...months.map(x => x.done + x.todo + x.bills)) * 1.15, Hc = 110;
   const cal = h('div', { class: 'n-cal' });
   if (cap > 0) cal.append(h('div', { class: 'n-cap', style: `bottom: ${(cap / mx * Hc + 18).toFixed(0)}px;` }, h('em', null, `capacité ${kE(cap)}`)));
   months.forEach((x, m) => {
-    const tot = x.done + x.todo + x.bills;
-    cal.append(h('button', { class: m < M ? 'past' : m === M ? 'now' : '', 'aria-label': 'Détail de ' + MONTHS_L[m], onclick: () => openMonthDetailsModal(Y, m) },
+    const tot = x.done + x.todo + x.bills, c = cur(m);
+    cal.append(h('button', { class: c, 'aria-label': 'Ouvrir ' + MONTHS_L[m], onclick: () => go(`#/s/m/${Y}/${m}`) },
       h('div', { class: 'b', style: `height: ${(tot / mx * 100).toFixed(1)}%;` },
         x.bills > 0 ? h('i', { style: `flex: ${x.bills}; background: var(--ch2);` }) : null,
-        x.todo > 0 ? h('i', { style: `flex: ${x.todo}; background: ${m <= M ? 'var(--ch4-l); border: 1.5px dashed var(--ch4)' : 'var(--ch4)'};` }) : null,
+        x.todo > 0 ? h('i', { style: `flex: ${x.todo}; background: ${c ? 'var(--ch4-l); border: 1.5px dashed var(--ch4)' : 'var(--ch4)'};` }) : null,
         x.done > 0 ? h('i', { style: `flex: ${x.done}; background: var(--ch4);` }) : null),
       h('span', null, MONTHS_S[m])));
   });
-  box.append(nCard(cal, nSub('Vert = achats et mises de côté · orange = grosse dépense de l’année · pointillé = à valider')));
-  if (!T.b.length && !T.p.length) box.append(nTight(nRow({ t: 'Programmez votre épargne', s: 'Un achat ou une mise de côté chaque mois : snowball vous le rappelle.', onclick: () => go('#/s/d'), vs: h('span', { class: 'n-pill' }, 'Commencer') })));
+  const yTot = months.reduce((t, x) => t + x.done + x.todo, 0), yDone = months.reduce((t, x) => t + x.done, 0);
+  box.append(nCard(cal, nSub('Touchez un mois pour le voir. Vert : achats et mises de côté · pointillé : à valider · orange : grosse dépense.'),
+    yTot > 0 ? h('div', { class: 'n-kv' }, h('div', null, h('span', null, `Prévu en ${Y}`), h('b', { class: 'num' }, nE(yTot))), h('div', null, h('span', null, 'Déjà fait'), h('b', { class: 'num n-pos' }, nE(yDone)))) : null));
+
+  // 2. En retard (mois passés)
+  if (Y === Y0) {
+    const lateB = T.b.filter(b => !b.done && b.m < M), lateP = pendProv(Y).filter(x => x.m < M);
+    if (lateB.length || lateP.length) {
+      box.append(nWh('Des mois passés', 'var(--warn)', `${lateB.length + lateP.length}`));
+      box.append(nTight(...lateB.map(b => nRow({ t: b.name, s: `${MONTHS_L[b.m]} · ${nE(b.amt)} · ${envNm(b.env)}`, vs: h('span', { class: 'n-acts' }, nAct('Fait', () => openExecuteBuyModal(b)), nGhost('Retirer', () => removeBuy(T, b))) })),
+        ...T.p.map(p => ({ p, ms: lateP.filter(x => x.p === p).map(x => x.m) })).filter(x => x.ms.length).map(({ p, ms }) => ms.length === 1
+          ? nRow({ t: `Mettre de côté · ${p.name}`, s: `${MONTHS_L[ms[0]]} · ${nE(p.amt)} · ${envNm(p.env)}`, vs: h('span', { class: 'n-acts' }, nAct('Fait', () => applyProv(p, ms[0], Y)), nGhost('Pas fait', () => provSkip(T, ms[0], p))) })
+          : nRow({ t: `Mettre de côté · ${p.name}`, s: `${ms.length} mois à confirmer, de ${MONTHS_L[ms[0]]} à ${MONTHS_L[ms[ms.length - 1]]} · ${nE(p.amt)} par mois`,
+              vs: h('span', { class: 'n-acts' }, nAct('Tous faits', () => provMany(T, p, ms, true, Y)), nGhost('Aucun', () => provMany(T, p, ms, false, Y))) })),
+        nSub('Le détail mois par mois est dans chaque colonne du calendrier.')));
+    }
+  }
+
+  // 3. Ce qui est programmé chaque mois
+  const series = {};
+  T.b.forEach(b => { const k = [b.name, b.env, b.amt].join('|'); (series[k] = series[k] || []).push(b); });
+  const ser = Object.values(series).filter(l => l.some(b => !b.done));
+  box.append(nWh('Programmé chaque mois'));
+  box.append(nTight(
+    ...ser.map(l => { const b = l[0], left = l.filter(z => !z.done), ms = l.map(z => z.m);
+      return nRow({ t: b.name, s: `${nE(b.amt)} / mois · ${envNm(b.env)} · ${Math.min(...ms) === Math.max(...ms) ? 'en ' + MONTHS_L[ms[0]] : `de ${MONTHS_L[Math.min(...ms)]} à ${MONTHS_L[Math.max(...ms)]}`}`, vs: nGhost('Arrêter', () => openConfirmModal({ title: 'Arrêter ces achats ?', message: `Les ${left.length} achats de « ${b.name} » pas encore faits en ${Y} seront retirés. Ceux déjà faits restent.`, confirmText: 'Arrêter', confirmStyle: 'btn-danger', onConfirm: () => { T.b = T.b.filter(z => !left.includes(z)); save(); render(); } })) }); }),
+    ...T.p.map(p => nRow({ t: `Mettre de côté · ${p.name}`, s: `${nE(p.amt)} / mois · ${envNm(p.env)} · depuis ${MONTHS_L[p.f || 0]}`, vs: nGhost('Arrêter', () => openConfirmModal({ title: 'Arrêter cette mise de côté ?', message: `« ${p.name} » ne sera plus proposée. L’argent déjà mis de côté reste sur le compte.`, confirmText: 'Arrêter', confirmStyle: 'btn-danger', onConfirm: () => { T.p = T.p.filter(z => z !== p); save(); render(); } })) })),
+    !ser.length && !T.p.length ? nSub('Rien de programmé : un achat ou une mise de côté chaque mois, et snowball vous le rappelle.') : null,
+    h('div', { class: 'n-two' }, h('button', { class: 'n-more', onclick: () => planAdd('buy') }, 'Programmer un achat'), h('button', { class: 'n-more', onclick: () => planAdd('prov') }, 'Mettre de côté'))));
+
+  // 4. Ce que la boule rapporte
   const P = passiveData();
   if (P.tot > 0) {
     box.append(nWh('Ce que votre boule vous rapporte', 'var(--up)', '12 mois'));
     box.append(h('div', { class: 'n-card n-passive' }, h('div', { class: 'n-big num' }, `${sE(P.tot)} / an`), nSub(`soit ≈ ${nE(P.tot / 12)} par mois, sans rien faire`),
       svgEl(passiveBarsH(P)),
       P.div > 0 ? nRow({ t: 'Dividendes reçus', s: 'réels, 12 derniers mois', v: sE(P.div), vc: 'var(--up)' }) : null,
-      P.interest > 0 ? nRow({ t: 'Intérêts estimés', s: 'livrets, fonds euros', v: sE(P.interest), vc: 'var(--up)' }) : null,
-      nMore(sheetPassive)));
+      P.interest > 0 ? nRow({ t: 'Intérêts estimés', s: 'livrets, fonds euros', v: sE(P.interest), vc: 'var(--up)' }) : null));
   }
-  const dc = divCalCard(); if (dc) box.append(dc);
-  box.append(nWh('Tout le détail'), nDetail('Plan complet', 'achats programmés, mises de côté, calendrier, années suivantes', '#/s/d'));
+  return box;
+}
+
+/* ---------- PAGE D'UN MOIS ---------- */
+function vMonth(Y, m) {
+  if (!(Y > 2000) || !(m >= 0 && m <= 11)) { setTimeout(() => go('#/s')); return h('div'); }
+  const T = getStrategy(Y), Y0 = nowYear(), M = nowMonth(), due = Y < Y0 || (Y === Y0 && m <= M), B = getBudget(), K = keyFigures();
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch4); --cl: var(--ch4-l);' }, nBack(Y === Y0 ? '#/s' : '#/s/' + Y, 'Mon plan'), nHead(due ? (Y === Y0 && m === M ? 'Ce mois-ci' : 'Mois passé') : 'À venir', `${MONTHS_L[m][0].toUpperCase() + MONTHS_L[m].slice(1)} ${Y}`));
+  const buys = T.b.filter(b => b.m === m), provs = T.p.filter(p => m >= (p.f || 0)), bills = (B.annualBills || []).filter(b => (b.dueMonth || 0) === m);
+  const tot = buys.reduce((t, b) => t + (b.done ? b.done.e || b.amt : b.amt), 0) + provs.filter(p => provState(T, m, p) !== 'skip').reduce((t, p) => t + p.amt, 0);
+  box.append(nCard(nKick('Prévu ce mois'), h('div', { class: 'n-big num' }, nE(tot)),
+    K.cap > 0 ? nSub(tot <= K.cap ? `Sur ${nE(K.cap)} d’épargne possible : ça passe.` : `Plus que vos ${nE(K.cap)} d’épargne possible : il manque ${nE(tot - K.cap)}.`) : null));
+  const st = (txt, col) => h('span', { class: 'n-pill', style: `--cc: ${col}; --cl: transparent;` }, txt);
+  box.append(nWh('Achats', null, `${buys.length}`));
+  box.append(nTight(...buys.map(b => nRow({ t: b.name, s: `${nE(b.done ? b.done.e || b.amt : b.amt)} · ${envNm(b.env)}`,
+      vs: b.done ? st('✓ Fait', 'var(--up)') : h('span', { class: 'n-acts' }, due ? nAct('Fait', () => openExecuteBuyModal(b)) : null, nGhost('Retirer', () => removeBuy(T, b))) })),
+    !buys.length ? nSub('Aucun achat ce mois-ci.') : null,
+    h('button', { class: 'n-more', onclick: () => planAdd('buy') }, 'Programmer un achat')));
+  box.append(nWh('Mises de côté', null, `${provs.length}`));
+  box.append(nTight(...provs.map(p => { const s0 = provState(T, m, p);
+      return nRow({ t: p.name, s: `${nE(p.amt)} · ${envNm(p.env)}`, vs: s0 === 'done' ? st('✓ Fait', 'var(--up)') : s0 === 'skip' ? st('Pas fait', 'var(--muted)')
+        : due ? h('span', { class: 'n-acts' }, nAct('Fait', () => applyProv(p, m, Y)), nGhost('Pas fait', () => provSkip(T, m, p))) : st('Prévu', 'var(--muted)') }); }),
+    !provs.length ? nSub('Aucune mise de côté ce mois-ci.') : null,
+    h('button', { class: 'n-more', onclick: () => planAdd('prov') }, 'Mettre de côté')));
+  if (bills.length) {
+    box.append(nWh('Grosses dépenses ce mois', 'var(--ch2)'));
+    box.append(nTight(...bills.map(x => nRow({ t: x.name, v: nE(x.amt), onclick: () => go('#/n') }))));
+  }
   return box;
 }
 
@@ -9308,7 +9400,7 @@ function render() {
     'e': () => vAccount(r[1]),
     'l': () => vLine(r[1], r[2]),
     'n': () => r[1] === 'c' ? vBudgetGroup(r[2]) : vCosts(),
-    's': () => r[1] === 'd' ? withTop(nBack('#/s', 'Mon plan'), vStrat()) : vPlan(),
+    's': () => r[1] === 'm' ? vMonth(+r[2], +r[3]) : vPlan(/^\d{4}$/.test(r[1] || '') ? +r[1] : null),
     'g': () => r[1] && r[1] !== 'd' ? vProject(r[1]) : vProjects(),
     'u': vCosts
   };
