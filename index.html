@@ -1366,6 +1366,25 @@ button.vz-li { cursor: pointer; }
 .vz-tile .vz-stack { margin: 2px 0 0; }
 .vz-tile .vz-leg.inline { gap: 2px 8px; } .vz-tile .vz-leg.inline .vz-li { font-size: 11px; gap: 4px; } .vz-tile .vz-li i { width: 8px; height: 8px; }
 .vz-tile-r { display: flex; align-items: center; gap: 10px; }
+.n-def { text-decoration: underline dotted; text-underline-offset: 3px; cursor: help; }
+.vz-health { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.vz-dots { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-size: 13px; color: var(--ink-secondary); }
+.vz-dots span { display: flex; align-items: center; gap: 6px; min-width: 0; } .vz-dots i { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.vz-health .n-hint { margin-top: 12px; }
+.vz-st { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--ink-secondary); padding: 2px 8px 2px 6px; border-radius: 99px; background: var(--surface-alt); align-self: flex-start; }
+.vz-st i { width: 8px; height: 8px; border-radius: 50%; background: var(--cc); }
+.vz-gauge { margin-top: 2px; } .vz-gz { position: relative; display: flex; gap: 2px; height: 8px; } .vz-gz i { border-radius: 2px; opacity: .85; }
+.vz-gz i:first-child { border-radius: 99px 2px 2px 99px; } .vz-gz i:nth-child(3) { border-radius: 2px 99px 99px 2px; }
+.vz-gz u { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--ink); box-shadow: 0 0 0 2px var(--surface); }
+.vz-gl { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+.vz-num { width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 13px; flex: none; }
+.vz-tl { display: grid; gap: 0; position: relative; }
+.vz-te { display: grid; grid-template-columns: 14px 1fr; gap: 10px; position: relative; padding: 8px 0; }
+.vz-te > i { width: 12px; height: 12px; border-radius: 50%; background: var(--cc); margin-top: 3px; box-shadow: 0 0 0 3px var(--surface); z-index: 1; }
+.vz-te:not(:last-child)::before { content: ''; position: absolute; left: 5.5px; top: 20px; bottom: -6px; width: 1px; background: var(--border); }
+.vz-te b { display: block; font-size: 14.5px; font-weight: 600; } .vz-te span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.vz-chips { display: flex; gap: 6px; margin-top: 10px; } .vz-chips button { flex: 1; padding: 6px 0; border-radius: 99px; border: 1px solid var(--border); background: var(--surface); font: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-secondary); cursor: pointer; }
+.vz-chips button.on { background: var(--ch1); border-color: var(--ch1); color: #fff; }
 .n-goal.vz-goal { display: flex; align-items: center; gap: 14px; }
 .n-card > .n-kv:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .n-kv > .n-eq { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--border); }
@@ -2019,8 +2038,8 @@ function healthData() {
   const loansNow = propertyLines().filter(({ l }) => l.loan && l.loan.amt > 0).map(({ l }) => loanCalc(l.loan)).filter(c => c.left > 0);
   if (!loansNow.length || B.rev > 0) {
     const d = loansNow.length ? loansNow.reduce((t, c) => t + c.tot, 0) / B.rev * 100 : 0;
-    cr.push({ n: 'Endettement', p: Math.round(25 * Math.max(0, Math.min(1, 1 - d / 35))), tip: `Crédit immobilier : ${fr1(d)} % de vos revenus, restez sous 35 %.`,
-      info: `Mensualités de crédit immobilier (assurance comprise) divisées par vos revenus nets. 0 % = 25 points, 35 % ou plus = 0 point (seuil bancaire). Vous : ${fr1(d)} %.` });
+    cr.push({ n: 'Endettement', p: d <= 25 ? 25 : d <= 33 ? 18 : d <= 35 ? 10 : 3, tip: d <= 33 ? `Crédit immobilier : ${fr1(d)} % de vos revenus, c’est sous le seuil de 35 %.` : `Crédit immobilier : ${fr1(d)} % de vos revenus, restez sous 35 %.`,
+      info: `Mensualités de crédit immobilier (assurance comprise) divisées par vos revenus nets. Les banques demandent de rester sous 35 %. 25 points jusqu’à 25 %, 18 jusqu’à 33 %, 10 jusqu’à 35 %. Vous : ${fr1(d)} %.` });
   }
   const score = Math.round(cr.reduce((t, c) => t + c.p, 0) / (25 * cr.length) * 100);
   return { cr, score, weak: cr.slice().sort((x, y) => x.p - y.p)[0] };
@@ -2365,14 +2384,14 @@ function vLine(eid, lid) {
   const t = TYPES[e.type], x = val(l), dv = divs(l), isIm = e.type === 'im';
   const cost = l.m ? l.cost * l.qty : (l.cst || 0), gain = x ? x.v + dv - cost : null;
   const q = l.m ? M.q[l.sym] : null;
-  const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nBack('#/e/' + eid, e.name), nHead(isIm ? 'Bien immobilier' : l.m ? (l.kind || 'Titre') : t.nc ? 'Solde' : 'Montant saisi', l.name));
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nBack('#/e/' + eid, e.name), nHead(isIm ? 'Bien immobilier' : l.m ? nDef(l.kind || 'Titre') : t.nc ? 'Solde' : 'Montant saisi', l.name));
   const row = (k, v) => h('div', null, h('span', null, k), h('b', { class: 'num' }, v));
   const kv = [];
-  if (l.m) kv.push(row('Parts', N.format(l.qty)), row('Prix de revient moyen', E2.format(l.cost)), row('Cours actuel', q && q.price != null ? `${q.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} ${q.currency === 'EUR' || !q.currency ? '€' : q.currency}` : 'indisponible'));
+  if (l.m) kv.push(row('Parts', N.format(l.qty)), row(nDef('Prix de revient moyen', 'PRU'), E2.format(l.cost)), row('Cours actuel', q && q.price != null ? `${q.price.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} ${q.currency === 'EUR' || !q.currency ? '€' : q.currency}` : 'indisponible'));
   else if (!t.nc && cost > 0) kv.push(row(isIm || e.type === 'au' ? 'Prix d’achat' : 'Vous avez versé', nE(cost)));
   if (gain != null && cost > 0 && !t.nc) kv.push(row(gain >= 0 ? 'Gain' : 'Perte', h('span', { class: gain >= 0 ? 'n-pos' : 'n-neg' }, `${sE(gain)} (${P.format(gain / cost)})`)));
   if (dv > 0) kv.push(row('dont dividendes reçus', h('span', { class: 'n-pos' }, sE(dv))));
-  if (l.fee != null) kv.push(row('Frais du fonds', `${fr1(l.fee)} % par an`));
+  if (l.fee != null) kv.push(row(nDef('Frais du fonds', 'frais'), `${fr1(l.fee)} % par an`));
   if (l.isin) kv.push(row('ISIN', l.isin));
   box.append(nCard(nKick('Valeur aujourd’hui'), h('div', { class: 'n-big num' }, x ? nE(x.v) : '—'), !x ? nSub('Cours indisponible pour l’instant : la valeur s’affichera à la prochaine mise à jour.') : null, kv.length ? h('div', { class: 'n-kv' }, ...kv) : null));
 
@@ -5709,12 +5728,18 @@ function vToday() {
   }
   if (K.net) recordHist(K.net);
   // La boule
-  const Hh = (S.hist || []).filter(x => new Date(x.d) >= Date.now() - 365 * 864e5);
-  let curve = null;
-  if (Hh.length >= 3) {
-    const t0 = new Date(Hh[0].d).getTime(), ts = (Date.now() - t0) || 1, mo = Math.round(ts / (30.4 * 864e5));
-    curve = vzLine(Hh.map(x => [(new Date(x.d).getTime() - t0) / ts, x.v]), { h: 92, c: 'var(--ch1)', label: 'Évolution du patrimoine net', xl: [[0, mo >= 11 ? 'il y a 12 mois' : `il y a ${Math.max(1, mo)} mois`], [1, 'aujourd’hui']] });
-  }
+  const curveFor = per => {
+    const days = { '1M': 31, '3M': 92, '6M': 183, '1A': 366, 'Max': 1e5 }[per], Hh = (S.hist || []).filter(x => new Date(x.d) >= Date.now() - days * 864e5);
+    if (Hh.length < 3) return h('div', { class: 'n-sub', style: 'padding: 20px 0; text-align: center;' }, 'Pas encore assez d’historique sur cette période.');
+    const t0 = new Date(Hh[0].d).getTime(), ts = (Date.now() - t0) || 1, dv = Hh[Hh.length - 1].v - Hh[0].v;
+    const since = per === 'Max' ? new Date(t0).toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' }) : { '1M': 'il y a 1 mois', '3M': 'il y a 3 mois', '6M': 'il y a 6 mois', '1A': 'il y a 1 an' }[per];
+    return h('div', null, vzLine(Hh.map(x => [(new Date(x.d).getTime() - t0) / ts, x.v]), { h: 92, c: 'var(--ch1)', label: 'Évolution du patrimoine net', xl: [[0, since], [1, 'aujourd’hui']] }),
+      h('div', { class: 'n-sub', style: 'margin-top: 4px;' }, 'Sur la période : ', nPos(dv)));
+  };
+  const curveBox = h('div'), per0 = window.HERO_P || '1A';
+  const chips = h('div', { class: 'vz-chips' }, ...['1M', '3M', '6M', '1A', 'Max'].map(k => h('button', { class: k === per0 ? 'on' : '', onclick: ev => { ev.stopPropagation(); window.HERO_P = k; chips.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.textContent === k)); curveBox.replaceChildren(curveFor(k)); } }, k)));
+  curveBox.append(curveFor(per0));
+  const curve = (S.hist || []).length >= 3 ? h('div', null, curveBox, chips) : null;
   const hero = h('button', { class: 'n-card n-hero', onclick: () => go('#/b') },
     h('span', { class: 'n-go' }, 'Projeter ›'), nKick('Votre boule de neige', 'var(--ch1)'), h('div', { class: 'n-big num' }, nE(K.net)),
     K.d30 != null ? h('div', { class: 'n-hero-d' }, h('div', null, nPos(K.d30), ' sur 30 jours'), K.d365 != null ? h('div', null, nPos(K.d365), ' sur 12 mois') : null) : nSub('Ce qui vous appartient vraiment, crédits et impôts déduits.'));
@@ -5747,10 +5772,120 @@ function vToday() {
     ));
   }
 
-  // À regarder : une seule alerte, la plus utile
+  const ch = cheerCard(); if (ch) box.append(ch);
+  if (items.length && nDone === items.length) { const ym = `${nowYear()}-${nowMonth()}`; if (S.cel !== ym) { S.cel = ym; save(); setTimeout(confetti, 300); } }
+  // À regarder : seulement ce qui manque pour que les calculs soient justes
   const al = homeAlert();
   if (al) box.append(nWh('À regarder', 'var(--warn)'), nTight(nRow({ lead: h('span', { class: 'n-d', style: 'background: var(--warn-light); color: var(--warn);' }, '!'), t: al.t, s: al.s, onclick: al.fn, vs: h('span', { class: 'n-pill' }, al.b) })));
+  const cal = calendarCard(); if (cal) box.append(cal);
+  const hc = healthCardHome(); if (hc) box.append(hc);
   return box;
+}
+
+/* ---------- Définitions au toucher ---------- */
+const DEFS = {
+  'PEA': ['PEA', 'Plan d’épargne en actions : un compte pour investir en Bourse (actions et ETF européens), avec moins d’impôts sur les gains après 5 ans. Un seul par personne.'],
+  'CTO': ['Compte-titres', 'Un compte pour investir en Bourse sans plafond ni restriction. Les gains sont imposés à 31,4 % (flat tax 2026) quand vous vendez.'],
+  'Assurance vie': ['Assurance vie', 'Un placement qui mélange un fonds euros (sans risque de perte, rendement modeste) et des unités de compte (Bourse, immobilier…). Fiscalité allégée après 8 ans.'],
+  'Livret A': ['Livret A', 'Épargne disponible à tout moment, sans risque et sans impôt. Son taux est fixé par l’État et revu le 1er février et le 1er août.'],
+  'Livret jeune / LDDS': ['Livret réglementé', 'Comme le Livret A : disponible, sans risque, sans impôt, avec un plafond.'],
+  'Épargne salariale': ['Épargne salariale', 'PEE ou PER collectif : l’argent placé via votre employeur, souvent complété par l’abondement. Bloqué 5 ans (PEE) ou jusqu’à la retraite (PER), sauf cas de déblocage.'],
+  'Cryptos': ['Cryptomonnaies', 'Bitcoin, Ethereum… Très volatiles : la valeur peut baisser fortement. Gains imposés à 31,4 % quand vous les convertissez en euros.'],
+  'ETF': ['ETF', 'Un fonds coté en Bourse qui réplique un indice (par exemple les 1 500 plus grandes entreprises mondiales). Diversifié et peu cher : souvent 0,1 à 0,4 % de frais par an.'],
+  'PRU': ['Prix de revient moyen', 'Le prix moyen auquel vous avez acheté une part, tous achats confondus. Il sert à calculer votre gain ou votre perte.'],
+  'frais': ['Frais du fonds', 'Ce que le gérant prélève chaque année, en pourcentage de ce que vous avez placé. Invisible mais régulier : 1 % de frais en plus peut coûter des milliers d’euros sur 20 ans.'],
+  'épargne possible': ['Épargne possible', 'Ce qu’il vous reste chaque mois : revenus moins dépenses moins mises de côté déjà prévues. C’est ce que vous pouvez placer ou garder pour vos projets.'],
+  'impôts': ['Impôts si vous vendiez', 'L’impôt que vous paieriez sur vos gains si vous vendiez tout aujourd’hui. Rien n’est dû tant que vous ne vendez pas, mais cet argent n’est pas vraiment à vous.'],
+  'net': ['Patrimoine net', 'Ce qui vous appartient vraiment : la valeur de vos biens, moins ce qu’il reste à rembourser sur vos crédits, moins les impôts que vous paieriez en vendant.'],
+  'inflation': ['Inflation', 'La hausse des prix. Si votre argent rapporte moins que l’inflation, il perd du pouvoir d’achat même si le montant ne baisse pas.']
+};
+function openInfo(title, text, extra) {
+  const root = $('#modal-root'), close = () => { root.innerHTML = ''; };
+  const modal = h('div', { class: 'modal-overlay', onclick: ev => { if (ev.target === modal) close(); } },
+    h('div', { class: 'modal-sheet', style: 'max-width: 460px;' },
+      h('div', { class: 'modal-body', style: 'padding-top: 22px;' }, h('div', { class: 'n-h1', style: 'font-size: 24px;' }, title), h('p', { style: 'margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: var(--ink-secondary);' }, text), extra || null),
+      h('div', { class: 'modal-footer' }, h('button', { class: 'btn btn-secondary btn-full', onclick: close }, 'Compris'))));
+  root.replaceChildren(modal);
+}
+// Un mot technique souligné : un toucher ouvre sa définition
+const nDef = (txt, key) => { const d = DEFS[key || txt]; return d ? h('span', { class: 'n-def', role: 'button', tabindex: '0', onclick: ev => { ev.stopPropagation(); openInfo(d[0], d[1]); } }, txt) : txt; };
+
+/* ---------- Santé financière : voyants, jauge, actions ---------- */
+const HS_LBL = p => p >= 18 ? ['Bien', 'var(--up)'] : p >= 8 ? ['À surveiller', 'var(--warn)'] : ['À renforcer', 'var(--down)'];
+const hsVal = c => { const m = /Vous : (.+?)\.?$/.exec(c.info || ''); const v = m ? m[1].trim() : ''; return c.n === 'Diversification' ? `${v} famille${+v > 1 ? 's' : ''}` : v; };
+const hsTab = n => ['Frais', 'Précaution', 'Taux d’épargne'].includes(n) ? '#/n' : n === 'Projets' ? '#/g' : '#/a';
+function healthCardHome() {
+  const D = healthData(); if (!D) return null;
+  const [lb] = HS_LBL(D.score / 4);
+  return h('div', null, nWh('Santé financière', 'var(--up)', 'Détail', () => go('#/h')),
+    h('button', { class: 'n-card vz-health', onclick: () => go('#/h') },
+      h('div', { class: 'vz-row' }, vzRing(D.score / 100, D.score >= 70 ? 'var(--up)' : D.score >= 40 ? 'var(--warn)' : 'var(--down)', 76, String(D.score)),
+        h('div', { class: 'vz-dots' }, ...D.cr.map(c => h('span', null, h('i', { style: `background: ${HS_LBL(c.p)[1]};` }), c.n.replace('Taux d’épargne', 'Épargne'))))),
+      D.weak.p < 18 ? h('div', { class: 'n-hint' }, h('b', null, 'À regarder : '), D.weak.tip) : h('div', { class: 'n-hint', style: 'background: var(--up-light);' }, h('b', null, 'Tout est au vert. '), 'Continuez comme ça.')));
+}
+function hsGauge(c) {
+  const pos = Math.max(0.02, Math.min(0.98, c.p / 25));
+  return h('div', { class: 'vz-gauge' }, h('div', { class: 'vz-gz' }, h('i', { style: 'flex: 8; background: var(--down);' }), h('i', { style: 'flex: 10; background: var(--warn);' }), h('i', { style: 'flex: 7; background: var(--up);' }), h('u', { style: `left: ${(pos * 100).toFixed(1)}%;` })),
+    h('div', { class: 'vz-gl' }, h('span', null, 'à renforcer'), h('span', null, 'à surveiller'), h('span', null, 'bien')));
+}
+function vHealth() {
+  const D = healthData(), box = h('div', { class: 'n-view', style: '--cc: var(--up); --cl: var(--up-light);' }, nBack('#/', 'Accueil'), nHead('Votre bilan', 'Santé financière'));
+  if (!D) { box.append(nNote('Ajoutez vos comptes pour voir votre bilan.')); return box; }
+  const nb = D.cr.filter(c => c.p < 18).length;
+  box.append(nCard(h('div', { class: 'vz-row' }, vzRing(D.score / 100, D.score >= 70 ? 'var(--up)' : D.score >= 40 ? 'var(--warn)' : 'var(--down)', 96, String(D.score)),
+    h('div', null, h('div', { style: 'font-size: 19px; font-weight: 700;' }, D.score >= 70 ? 'Plutôt solide' : D.score >= 40 ? 'À consolider' : 'À renforcer'),
+      nSub(nb ? `${nb} point${nb > 1 ? 's' : ''} à améliorer pour progresser.` : 'Tous vos repères sont au vert.')))));
+  const acts = D.cr.filter(c => c.p < 18).sort((x, y) => x.p - y.p).slice(0, 3);
+  if (acts.length) {
+    box.append(nWh(`Vos ${acts.length > 1 ? acts.length + ' ' : ''}prochaine${acts.length > 1 ? 's' : ''} action${acts.length > 1 ? 's' : ''}`));
+    box.append(nTight(...acts.map((c, i) => nRow({ lead: h('span', { class: 'vz-num' }, String(i + 1)), t: c.n, s: c.tip, onclick: () => go(hsTab(c.n)) }))));
+  }
+  box.append(nWh('Vos 6 repères'));
+  box.append(h('div', { class: 'vz-tiles' }, ...D.cr.map(c => { const [lb, col] = HS_LBL(c.p);
+    return h('button', { class: 'vz-tile', onclick: () => openInfo(c.n, c.info, h('div', { style: 'margin-top: 14px;' }, hsGauge(c), h('p', { style: 'margin: 12px 0 0; font-size: 14px; color: var(--ink-secondary);' }, c.tip))) },
+      h('span', { class: 'vz-st', style: `--cc: ${col};` }, h('i'), lb), h('span', { style: 'font-weight: 600; font-size: 14px;' }, c.n), h('span', { class: 'v num' }, hsVal(c)), hsGauge(c)); })));
+  box.append(nNote('Seuils indicatifs, couramment utilisés. Touchez un repère pour son explication. Pas des conseils en investissement.'));
+  return box;
+}
+
+/* ---------- Calendrier des prochains mois ---------- */
+function upcomingEvents() {
+  const Y = nowYear(), M = nowMonth(), out = [], B = getBudget(), now = Y * 12 + M;
+  const AB = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  const lbl = k => { const y = Math.floor(k / 12); return `${AB[k % 12]}${y !== Y ? ' ' + y : ''}`; };
+  const nk = now + 1, T = getStrategy(Math.floor(nk / 12)), nb = T.b.filter(b => b.m === nk % 12 && !b.done);
+  if (nb.length) out.push({ k: nk, c: 'var(--ch4)', t: 'Achats habituels', s: nb.map(b => `${b.name} ${nE(b.amt)}`).join(' · ') });
+  (B.annualBills || []).forEach(b => { let k = Y * 12 + (b.dueMonth || 0); if (k <= now) k += 12; if (k - now <= 12) out.push({ k, c: 'var(--ch2)', t: `${b.name} ${nE(b.amt)}`, s: `≈ ${nE(b.amt / Math.max(1, k - now))} par mois d’ici là` }); });
+  if (S.envs.some(e => e.type === 'la' || e.type === 'lj')) { const k = [Y * 12 + 1, Y * 12 + 7, Y * 12 + 13].find(x => x > now); out.push({ k, c: 'var(--ch1)', pre: '1er ', t: 'Révision du taux du Livret A', s: `Taux actuel : ${fr1(LIVRET_RATE)} %` }); }
+  const X = goalCalc('net');
+  gl().forEach(g => { const d = new Date(g.date), k = d.getFullYear() * 12 + d.getMonth(), x = X[g.id] || { funded: 0 }; if (k >= now && k - now <= 60) out.push({ k, c: 'var(--ch3)', t: g.name, s: `${nE(g.target)} · financé à ${P0.format(Math.min(1, x.funded / g.target))}` }); });
+  creditsAll().filter(x => !x.c.partial && x.c.left > 0).forEach(x => { const k = x.c.endY * 12 + x.c.endM; if (k - now <= 60) out.push({ k, c: 'var(--down)', t: `Fin du ${x.name.toLowerCase()}`, s: `+ ${nE(x.c.tot)} de marge chaque mois ensuite` }); });
+  return out.sort((a, b) => a.k - b.k).slice(0, 5).map(e => Object.assign(e, { when: (e.pre || '') + lbl(e.k) }));
+}
+function calendarCard() {
+  const ev = upcomingEvents(); if (!ev.length) return null;
+  return h('div', null, nWh('Les prochains mois'), nCard(h('div', { class: 'vz-tl' }, ...ev.map(e => h('div', { class: 'vz-te', style: `--cc: ${e.c};` }, h('i'),
+    h('div', null, h('b', null, `${e.when[0].toUpperCase() + e.when.slice(1)} · ${e.t}`), h('span', null, e.s)))))));
+}
+
+/* ---------- Encouragement ---------- */
+function cheerCard() {
+  const Y = nowYear(), M = nowMonth(), T = getStrategy(Y); let kept = 0, tot = 0;
+  for (let m = 0; m < M; m++) {
+    const bs = T.b.filter(b => b.m === m), ps = T.p.filter(p => m >= (p.f || 0));
+    if (!bs.length && !ps.length) continue; tot++;
+    if (bs.every(b => b.done) && ps.every(p => provState(T, m, p) !== 'todo')) kept++;
+  }
+  if (tot < 2 || kept / tot < 0.5) return null;
+  const X = goalCalc('net'), nxt = gl().slice().sort((a, b) => a.date.localeCompare(b.date)).find(g => !isGoalDone(g, X[g.id] || { funded: 0 }));
+  return h('div', { class: 'n-callout', style: '--cl: var(--up-light);' }, h('b', null, '👏 Bien joué'), h('div', { style: 'margin-top: 3px;' }, `Vous avez tenu votre plan ${kept} mois sur ${tot}.${nxt ? ` À ce rythme, « ${nxt.name} » sera prêt en ${fmtGoalDate(new Date(nxt.date))}.` : ''}`));
+}
+
+/* ---------- Avec et sans fuites ---------- */
+function leakCurve(L) {
+  const pts = []; for (let t = 0; t <= 20; t++) pts.push([t / 20, L.tot * Math.pow(t / 20, 1.6)]);
+  return h('div', null, vzLine(pts, { h: 120, c: 'var(--s8)', zero: true, label: 'Ce que coûtent les fuites, cumulé sur 20 ans', refs: [{ y: L.tot, l: `− ${kE(L.tot)} en 20 ans` }], xl: [[0, 'aujourd’hui'], [0.5, '10 ans'], [1, '20 ans']] }),
+    nSub('Petites chaque année, les fuites s’additionnent et grossissent avec le temps, comme la boule elle-même.'));
 }
 
 // L'essentiel : une tuile par onglet, avec un petit graphique
@@ -5776,12 +5911,7 @@ function homeAlert() {
   const e = S.envs.find(x => !envDone(x));
   if (e) return { t: e.name, s: envTodo(e), b: 'Compléter', fn: () => go('#/e/' + e.id) };
   if (!(getBudget().rev > 0)) return { t: 'Votre budget du mois', s: 'Sans revenus ni dépenses, snowball ne peut pas calculer votre épargne possible.', b: 'Renseigner', fn: () => go('#/n') };
-  // Seulement un vrai point rouge (l'endettement n'alerte qu'à partir d'environ 31 % des revenus)
-  const D = healthData(); if (!D) return null;
-  const w = D.cr.filter(c => c.n === 'Endettement' ? c.p <= 3 : c.p < 8).sort((x, y) => x.p - y.p)[0];
-  if (!w) return null;
-  const tab = ['Frais', 'Précaution', 'Taux d’épargne'].includes(w.n) ? '#/n' : '#/a';
-  return { t: w.n, s: w.tip, b: 'Voir', fn: () => go(tab) };
+  return null;
 }
 
 /* ---------- MA BOULE (projection) ---------- */
@@ -5863,8 +5993,8 @@ function vMoney() {
   box.append(nCard(nKick('À qui reviennent vos biens'), vzStack(own, 16), vzLegend(own, { inline: true }), h('div', { class: 'n-kv', style: 'margin-top: 12px;' },
     eq('Ce que vous avez', nE(a.v)),
     K.debt > 0 ? eq('Crédits restant dus', '− ' + nE(K.debt), 'n-neg') : null,
-    K.sm.t > 0 ? eq('Impôts si vous vendiez', '− ' + nE(K.sm.t), 'n-neg') : null,
-    h('div', { class: 'n-eq' }, h('span', null, 'Patrimoine net'), h('b', { class: 'num' }, nE(K.net)))),
+    K.sm.t > 0 ? eq(nDef('Impôts si vous vendiez', 'impôts'), '− ' + nE(K.sm.t), 'n-neg') : null,
+    h('div', { class: 'n-eq' }, h('span', null, nDef('Patrimoine net', 'net')), h('b', { class: 'num' }, nE(K.net)))),
     a.miss ? nSub(`${a.miss} ligne${a.miss > 1 ? 's' : ''} sans cours pour l’instant : non comptée${a.miss > 1 ? 's' : ''}.`) : null));
 
   // 2. Répartition aujourd’hui et visée, dans un seul bloc
@@ -5882,6 +6012,15 @@ function vMoney() {
       need && need.d <= -3 ? h('div', { class: 'n-buy' }, 'Vos prochains achats : ', h('b', null, `en priorité ${need.c === 'Épargne' ? 'sur l’épargne' : need.c === 'Immobilier' ? 'sur l’immobilier' : need.c === 'Autres' ? 'sur les autres actifs' : 'sur la ' + need.c}`), '.') : null));
   }
 
+  // Où iraient les achats du mois
+  const mb = getStrategy(nowYear()).b.filter(b => b.m === nowMonth()), byC = {};
+  mb.forEach(b => { const en = S.envs.find(x => x.id === b.env); const c = en ? TYPES[en.type].c : 'Autres'; byC[c] = (byC[c] || 0) + b.amt; });
+  const mbs = CLASSES.filter(c => byC[c]).map(c => ({ k: c, v: byC[c], c: KCOL[c] })), mbt = mbs.reduce((t, x) => t + x.v, 0);
+  const Tg = S.target || {}, gaps = a.v > 0 ? CLASSES.filter(c => Tg[c] != null).map(c => ({ c, d: agg(classEnvs(c).flatMap(e => e.lines)).v / a.v * 100 - Tg[c] })).sort((x, y) => x.d - y.d) : [];
+  const lack = gaps[0] && gaps[0].d <= -3 ? gaps[0].c : null;
+  if (mbt > 0) box.append(nWh(`Vos ${nE(mbt)} d’achats de ce mois iraient…`), nCard(vzStack(mbs, 16), vzLegend(mbs, { inline: true }),
+    nSub(lack && !byC[lack] ? `Aucun ne va vers « ${lack} », la famille la plus en retard sur votre objectif. Orienter vos prochains achats suffit : inutile de vendre.` : lack ? `Une partie va vers « ${lack} », la famille la plus en retard : c’est dans le bon sens.` : 'Orienter vos achats suffit pour garder votre répartition : inutile de vendre.')));
+
   // 3. Les comptes
   box.append(nWh('Comptes', null, `${S.envs.length}`));
   box.append(nTight(...S.envs.slice().sort((x, y) => agg(y.lines).v - agg(x.lines).v).map(e => { const x = agg(e.lines), t = TYPES[e.type], g = x.v - x.c;
@@ -5891,6 +6030,16 @@ function vMoney() {
     r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 5px; margin-top: 6px;' }, h('i', { style: `width: ${(a.v > 0 ? x.v / a.v * 100 : 0).toFixed(1)}%; background: ${KCOL[t.c]};` })));
     return r; }),
     h('button', { class: 'n-more', onclick: () => openAddMenu() }, 'Ajouter un compte ou un placement')));
+
+  // Performances par position
+  const perf = S.envs.flatMap(e => e.lines.map(l => ({ e, l, x: val(l) }))).filter(o => o.x && o.x.c > 0 && !TYPES[o.e.type].nc).map(o => ({ ...o, r: (o.x.v + divs(o.l) - o.x.c) / o.x.c })).sort((p, q) => q.r - p.r);
+  if (perf.length >= 3) {
+    const n = Math.min(2, Math.floor(perf.length / 2)), best = perf.slice(0, n), worst = perf.slice(-n).reverse(), mxr = Math.max(...perf.map(o => Math.abs(o.r)), 0.01);
+    const prow = o => { const r = nRow({ t: o.l.name, s: o.e.name, onclick: () => go(`#/l/${o.e.id}/${o.l.id}`), v: P.format(o.r), vc: o.r >= 0 ? 'var(--up)' : 'var(--down)' });
+      r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 5px; margin-top: 6px;' }, h('i', { style: `width: ${(Math.abs(o.r) / mxr * 100).toFixed(1)}%; background: ${o.r >= 0 ? 'var(--up)' : 'var(--down)'};` }))); return r; };
+    box.append(nWh('Performances par position', null, 'dividendes compris'), nTight(h('div', { class: 'n-add-k', style: '--cc: var(--up); margin-top: 12px;' }, 'Les meilleures'), ...best.map(prow),
+      h('div', { class: 'n-add-k', style: '--cc: var(--muted);' }, 'Les moins bonnes'), ...worst.map(prow)));
+  }
 
   // 4. Les crédits
   const C = creditsAll();
@@ -5908,7 +6057,7 @@ function vAccount(id) {
   const e = S.envs.find(x => x.id === id);
   if (!e) { setTimeout(() => go('#/a')); return h('div'); }
   const t = TYPES[e.type], a = agg(e.lines), g = a.v - a.c;
-  const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nBack('#/a', 'Mon argent'), nHead(t.n, e.name));
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch1); --cl: var(--ch1-l);' }, nBack('#/a', 'Mon argent'), nHead(nDef(t.n), e.name));
   const kv = [];
   if (!t.nc && a.c > 0) kv.push([e.type === 'im' || e.type === 'au' ? 'Prix d’achat' : 'Vous avez versé', nE(a.c)], [g >= 0 ? 'Gain' : 'Perte', h('span', { class: g >= 0 ? 'n-pos' : 'n-neg' }, `${sE(g)} (${P.format(g / a.c)})`)]);
   if (t.nc) kv.push(['Taux', `${fr1(livretRate(e))} % par an`], ['Intérêts', `≈ ${nE(a.v * livretRate(e) / 100)} par an`]);
@@ -5996,7 +6145,7 @@ function vCosts() {
     box.append(nCard(
       nKick(cap >= 0 ? 'Il vous reste chaque mois' : 'Il vous manque chaque mois', cap >= 0 ? 'var(--up)' : 'var(--down)'),
       h('div', { class: 'n-big num', style: cap < 0 ? 'color: var(--down);' : null }, nE(Math.abs(cap))),
-      nSub(cap >= 0 ? 'C’est votre épargne possible : ce que vous pouvez placer ou garder pour vos projets.' : 'Vos dépenses dépassent vos revenus : regardez les plus gros postes.'),
+      nSub(cap >= 0 ? h('span', null, 'C’est votre ', nDef('épargne possible'), ' : ce que vous pouvez placer ou garder pour vos projets.') : 'Vos dépenses dépassent vos revenus : regardez les plus gros postes.'),
       h('div', { class: 'n-kick', style: 'margin-top: 16px;' }, `Où vont vos ${nE(B.rev)} de revenus`), vzStack(flow, 18), vzLegend(flow, { inline: true }),
       h('div', { class: 'n-buds' },
         h('button', { class: 'n-bud n-bud-rev', onclick: () => openRevenueEditModal(B) }, h('div', { class: 'n-bud-h' }, h('span', null, 'Revenus'), h('b', { class: 'num n-pos' }, '+ ' + nE(B.rev)))),
@@ -6025,7 +6174,8 @@ function vCosts() {
   if (rows.length) {
     const tot = rows.reduce((t, x) => t + x.v, 0);
     box.append(nWh('Ce que coûte votre patrimoine', 'var(--down)'));
-    box.append(nTight(h('div', { class: 'n-sub', style: 'padding: 12px 0 4px;' }, 'Sur 20 ans, au total : ', h('b', { style: 'color: var(--down);' }, '− ' + kE(tot))),...rows.sort((x, y) => y.v - x.v).map((x, i, all) => { const r = nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)', onclick: x.fn || null });
+    box.append(nCard(nKick('Ce que les fuites vous coûtent, cumulé'), leakCurve(L)));
+    box.append(nTight(h('div', { class: 'n-sub', style: 'padding: 12px 0 4px;' }, 'Les fuites une par une, sur 20 ans : ', h('b', { style: 'color: var(--down);' }, '− ' + kE(tot))),...rows.sort((x, y) => y.v - x.v).map((x, i, all) => { const r = nRow({ lead: h('span', { class: 'n-d' }, x.ico), t: x.t, s: x.s, tip: x.tip, v: '− ' + kE(x.v), vc: 'var(--down)', onclick: x.fn || null });
       r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 6px; margin-top: 6px;' }, h('i', { style: `width: ${(x.v / all[0].v * 100).toFixed(1)}%; background: var(--down);` }))); return r; })),
       nNote('Cumul sur 20 ans, avec l’hypothèse d’un placement à 4 % par an. Repères pédagogiques, pas des conseils en investissement.'));
   }
@@ -6264,8 +6414,9 @@ function vPlan(year) {
     box.append(nWh('Ce que votre boule vous rapporte', 'var(--up)', '12 mois'));
     box.append(h('div', { class: 'n-card n-passive' }, h('div', { class: 'n-big num' }, `${sE(P.tot)} / an`), nSub(`soit ≈ ${nE(P.tot / 12)} par mois, sans rien faire`),
       svgEl(passiveBarsH(P)),
-      P.div > 0 ? nRow({ t: 'Dividendes reçus', s: 'réels, 12 derniers mois', v: sE(P.div), vc: 'var(--up)' }) : null,
-      P.interest > 0 ? nRow({ t: 'Intérêts estimés', s: 'livrets, fonds euros', v: sE(P.interest), vc: 'var(--up)' }) : null));
+      h('div', { class: 'n-add-k', style: '--cc: var(--ink-secondary); margin-top: 18px;' }, 'Qui vous paie'),
+      ...P.payers.slice(0, 6).map(py => { const r = nRow({ t: py.k, s: py.s === 'dividendes' ? 'dividendes reçus' : py.s, v: sE(py.v) });
+        r.querySelector('.n-tt').append(h('div', { class: 'n-bar', style: 'height: 6px; margin-top: 6px;' }, h('i', { style: `width: ${(py.v / P.payers[0].v * 100).toFixed(1)}%; background: var(--up);` }))); return r; })));
   }
   return box;
 }
@@ -6319,6 +6470,7 @@ function render() {
     'a': () => r[1] === 't' ? vTarget() : vMoney(),
     'k': () => vCredit(r.slice(1).join('/')),
     'b': vBall,
+    'h': vHealth,
     'e': () => vAccount(r[1]),
     'l': () => vLine(r[1], r[2]),
     'n': () => r[1] === 'c' ? vBudgetGroup(r[2]) : vCosts(),
@@ -6347,7 +6499,7 @@ function render() {
 }
 
 function updateNav(k) {
-  const activeIdx = ['', 'b'].includes(k) ? 0 : ['n', 'u'].includes(k) ? 2 : k === 'g' ? 3 : k === 's' ? 4 : 1;
+  const activeIdx = ['', 'b', 'h'].includes(k) ? 0 : ['n', 'u'].includes(k) ? 2 : k === 'g' ? 3 : k === 's' ? 4 : 1;
   
   const pendingBuysCount = (S.st && S.st[nowYear()] ? S.st[nowYear()].b.filter(b => isDueBuy(b, nowYear())).length : 0) + pendProv(nowYear()).length;
 

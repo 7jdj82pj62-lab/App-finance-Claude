@@ -66,7 +66,7 @@ const num = s => +String(s).replace(/[^\d,-]/g, '').replace(',', '.');
 
     /* ---------- 2. Utilisateur existant : tous les écrans ---------- */
     const p = await newPage(b, demo, 320);
-    const routes = ['#/', '#/b', '#/a', '#/a/t', '#/e/av1', '#/e/la1', '#/e/im1', '#/l/av1/l2', '#/l/av1/l7', '#/l/im1/l5', '#/k/c1', '#/k/im1/l5',
+    const routes = ['#/', '#/h', '#/b', '#/a', '#/a/t', '#/e/av1', '#/e/la1', '#/e/im1', '#/l/av1/l2', '#/l/av1/l7', '#/l/im1/l5', '#/k/c1', '#/k/im1/l5',
       '#/n', '#/n/c/housing', '#/g', '#/g/g1', '#/g/g2', '#/s', `#/s/${Y + 1}`, `#/s/m/${Y}/${M}`];
     for (const r of routes) {
       await go(p, r);
@@ -80,9 +80,19 @@ const num = s => +String(s).replace(/[^\d,-]/g, '').replace(',', '.');
     /* ---------- 3. Accueil ---------- */
     await go(p, '#/');
     ok('accueil : opérations en retard sur une ligne', (await p.textContent('#app')).includes('opérations des mois passés'));
-    ok('accueil : pas d’alerte si tout va bien', !(await p.textContent('#app')).includes('À regarder'));
+    const alertH = () => p.locator('.n-wh h2', { hasText: 'À regarder' }).count();
+    ok('accueil : pas d’alerte si tout va bien', (await alertH()) === 0);
+    ok('accueil : calendrier des prochains mois', (await p.textContent('#app')).includes('Révision du taux du Livret A'));
+    ok('accueil : bloc santé', (await p.locator('.vz-health').count()) === 1);
+    await p.locator('.vz-chips button', { hasText: '3M' }).click(); await p.waitForTimeout(150);
+    ok('accueil : période de la courbe', p.url().endsWith('#/') && (await p.locator('.vz-chips button.on').textContent()) === '3M');
+    await p.locator('.vz-health').click(); await p.waitForTimeout(200);
+    ok('santé : page ouverte', p.url().endsWith('#/h') && (await p.locator('.vz-tile').count()) === 6);
+    await p.locator('.vz-tile').first().click(); await p.waitForTimeout(150);
+    ok('santé : explication et jauge', (await p.locator('#modal-root .vz-gauge').count()) === 1);
+    await clearModal(p); await go(p, '#/');
     await p.evaluate(() => { S.envs.push({ id: 'x1', type: 'pea', name: 'PEA vide', lines: [] }); save(); render(); });
-    ok('accueil : alerte pour un compte incomplet', (await p.textContent('#app')).includes('À regarder'));
+    ok('accueil : alerte pour un compte incomplet', (await alertH()) === 1);
     await p.evaluate(() => { S.envs = S.envs.filter(e => e.id !== 'x1'); save(); });
 
     /* ---------- 4. Mon argent ---------- */
@@ -93,6 +103,10 @@ const num = s => +String(s).replace(/[^\d,-]/g, '').replace(',', '.');
     await p.locator('.n-row', { hasText: 'Crédit auto' }).click(); await p.waitForTimeout(200);
     ok('mon argent : crédit → sa page', p.url().endsWith('#/k/c1'));
     ok('crédit : coût total affiché', (await p.textContent('#app')).includes('Au total, vous rembourserez'));
+    await go(p, '#/e/av1'); await p.locator('.n-def').first().click(); await p.waitForTimeout(150);
+    ok('définition au toucher', (await p.textContent('#modal-root')).includes('fonds euros')); await clearModal(p);
+    await go(p, '#/a');
+    ok('mon argent : achats du mois et performances', (await p.textContent('#app')).includes('d’achats de ce mois iraient') && (await p.textContent('#app')).includes('Les meilleures'));
 
     /* ---------- 5. Mes coûts ---------- */
     await go(p, '#/n/c/housing');

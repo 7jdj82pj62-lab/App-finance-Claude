@@ -1,5 +1,16 @@
 # Journal des modifications
 
+## Version 21 : le meilleur du catalogue des widgets
+Dix éléments repris du catalogue (numéros entre parenthèses), choisis parce qu'ils apportent une information nouvelle sans doubler l'existant.
+- **Accueil** : période de la courbe au choix 1M / 3M / 6M / 1A / Max avec la variation sur la période (24) ; « Les prochains mois » en frise : achats du mois suivant, grosses dépenses avec la somme à mettre de côté par mois, révision du taux du Livret A, échéances de projets, fins de crédit (34) ; « Bien joué » quand le plan est tenu au moins un mois sur deux, avec la date du prochain projet (33) ; bloc **Santé financière** : score et 6 voyants, le point à regarder (39) ; confettis quand tout le mois est fait.
+- **Nouvelle page Santé** (`#/h`) : score, « Vos prochaines actions » (45), les 6 repères en tuiles avec leur valeur et une jauge rouge / orange / vert, explication au toucher (40, 43). Endettement recalé sur le seuil bancaire : bien jusqu'à 25 %, correct jusqu'à 33 %.
+- **Mon argent** : « Vos X € d'achats de ce mois iraient… » avec un conseil cohérent avec l'objectif (52) ; « Performances par position », meilleures et moins bonnes, dividendes compris (55).
+- **Mes coûts** : courbe de ce que coûtent les fuites, cumulé sur 20 ans (77, adaptée : les deux courbes « avec / sans » se superposaient).
+- **Mon plan** : « Qui vous paie » en barres (94).
+- **Définitions au toucher** (103) : PEA, CTO, assurance vie, livrets, épargne salariale, cryptos, ETF, prix de revient moyen, frais du fonds, épargne possible, impôts si vous vendiez, patrimoine net.
+
+Tests : `node tests/appli.e2e.js` : **77/77**.
+
 ## Version 20 : plus de repères visuels
 De petits graphiques simples dans chaque écran, avec une palette de 8 couleurs vérifiée par calcul pour le daltonisme, en clair comme en sombre (`--s1` à `--s8`). Une couleur suit toujours la même chose (une famille de placements, une catégorie de dépenses, un compte), et chaque graphique a sa légende avec les valeurs. Toucher une barre ou une part affiche une bulle avec le détail.
 - **Accueil** : courbe de la boule avec repères de temps ; nouvelles tuiles « L'essentiel » (répartition, ce qu'il reste chaque mois, anneau des projets, anneau du plan de l'année) ; barre d'avancement de « Ce mois-ci » ; « Pourquoi ça a bougé » en barres de part et d'autre de zéro.
