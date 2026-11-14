@@ -9172,7 +9172,7 @@ function vBudgetGroup(gk) {
 
 /* ---------- MES PROJETS ---------- */
 function vProjects() {
-  const K = keyFigures(), X = goalCalc(), G = gl().slice().sort((a, b) => a.date.localeCompare(b.date));
+  const K = keyFigures(), X = goalCalc('net'), G = gl().slice().sort((a, b) => a.date.localeCompare(b.date));
   const box = h('div', { class: 'n-view', style: '--cc: var(--ch3); --cl: var(--ch3-l);' }, nHead('Pour quoi j’épargne ?', 'Mes projets'));
   if (!G.length) {
     box.append(h('div', { class: 'n-callout' }, h('div', { style: 'font-size: 15px;' }, 'Un voyage, une voiture, un apport ? Ajoutez un projet : snowball calcule ce qu’il faut mettre de côté chaque mois.')),
@@ -9180,19 +9180,67 @@ function vProjects() {
     return box;
   }
   const eff = G.map(g => ({ g, x: X[g.id] || { funded: 0, parts: [] }, e: goalEffort(g, X[g.id]) }));
+  // 1. Le prochain objectif
   const next = eff.find(z => !isGoalDone(z.g, z.x));
-  if (next) box.append(h('div', { class: 'n-callout' }, nKick(`Prochain objectif · ${next.g.name}, ${fmtGoalDate(next.e.gd)}`),
-    h('div', { style: 'margin-top: 4px; font-size: 15px;' }, next.e.effort > 0 ? h('span', null, 'Mettez ', h('b', null, `≈ ${nE(next.e.effort)} par mois`), ` pendant ${next.e.n} mois pour l’atteindre à temps.`) : 'Il est déjà couvert par vos placements et achats prévus.')));
+  if (next) box.append(h('button', { class: 'n-callout', style: 'display: block; width: 100%; text-align: left; border: 0; font: inherit; color: inherit; cursor: pointer;', onclick: () => go('#/g/' + next.g.id) },
+    nKick(`Prochain objectif · ${fmtGoalDate(next.e.gd)}`), h('div', { style: 'font-weight: 700; font-size: 17px; margin-top: 2px;' }, next.g.name),
+    h('div', { style: 'margin-top: 4px; font-size: 15px;' }, next.e.effort > 0 ? h('span', null, 'Mettez ', h('b', null, `≈ ${nE(next.e.effort)} par mois`), ` pendant ${next.e.n} mois pour l’atteindre à temps.`) : 'Il est déjà couvert par vos comptes et ce qui est programmé.')));
+  // 2. Tous les projets
+  box.append(nWh('Vos projets', null, `${G.length}`));
   box.append(nTight(...eff.map(({ g, x, e }) => { const p = g.target > 0 ? Math.min(1, x.funded / g.target) : 0, done = isGoalDone(g, x);
     return h('button', { class: 'n-goal', onclick: () => go('#/g/' + g.id) },
       h('div', { class: 'n-gh' }, h('b', null, g.name), h('em', { style: done ? 'color: var(--up);' : null }, done ? 'Atteint ✓' : P0.format(p))),
       h('div', { class: 'n-bar' }, h('i', { style: `width: ${(p * 100).toFixed(1)}%;${done ? ' background: var(--up);' : ''}` })),
-      h('div', { class: 'n-gf' }, h('span', null, `${nE(x.funded)} sur ${nE(g.target)}`), h('span', null, `${e.effort > 0 ? nE(e.effort) + ' / mois · ' : ''}${fmtGoalDate(e.gd)}`))); })));
+      h('div', { class: 'n-gf' }, h('span', null, `${nE(x.funded)} sur ${nE(g.target)}`), h('span', null, `${e.effort > 0 ? nE(e.effort) + ' / mois · ' : ''}${fmtGoalDate(e.gd)}`))); }),
+    h('button', { class: 'n-more', onclick: () => openGoalModal() }, 'Ajouter un projet')));
+  // 3. Est-ce que ça passe ?
   const tot = eff.reduce((t, z) => t + z.e.effort, 0);
-  if (B_ok()) box.append(h('div', { class: 'n-callout', style: `--cl: ${tot <= K.cap ? 'var(--up-light)' : 'var(--warn-light)'};` },
-    'Vos projets demandent ', h('b', null, `${nE(tot)} / mois`), ` sur ${nE(Math.max(0, K.cap))} possibles : `, tot <= K.cap ? h('span', null, 'il vous reste ', h('b', null, nE(K.cap - tot)), ' de marge.') : h('span', null, 'il manque ', h('b', null, nE(tot - K.cap)), ' par mois.')));
-  box.append(nMore(sheetGoals), h('button', { class: 'n-more', onclick: () => openGoalModal() }, 'Ajouter un projet'));
-  box.append(nWh('Tout le détail'), nDetail('Tous les projets', 'financement par compte, brut ou net d’impôts, indépendance financière', '#/g/d'));
+  if (tot > 0) {
+    box.append(nWh('Est-ce que ça passe ?'));
+    if (!B_ok()) box.append(nTight(nRow({ t: `Vos projets demandent ${nE(tot)} par mois`, s: 'Renseignez votre budget pour savoir si c’est possible.', onclick: () => go('#/n'), vs: h('span', { class: 'n-pill' }, 'Budget') })));
+    else {
+      const cap = Math.max(0, K.cap), ok = tot <= cap;
+      box.append(nCard(h('div', { class: 'n-kv' },
+          h('div', null, h('span', null, 'Vos projets demandent'), h('b', { class: 'num' }, `${nE(tot)} / mois`)),
+          h('div', null, h('span', null, 'Votre épargne possible'), h('b', { class: 'num' }, `${nE(cap)} / mois`)),
+          h('div', { class: 'n-eq' }, h('span', null, ok ? 'Il vous reste' : 'Il manque'), h('b', { class: 'num', style: `color: ${ok ? 'var(--up)' : 'var(--down)'};` }, `${nE(Math.abs(cap - tot))} / mois`))),
+        ok ? null : nSub('Décalez une date ou réduisez un montant pour que ça passe.')));
+    }
+  }
+  box.append(nNote('Calcul prudent, sans rendement futur. Chaque compte finance d’abord le projet le plus proche, sans être compté deux fois. Impôts sur les gains déduits.'));
+  return box;
+}
+
+/* ---------- PAGE D'UN PROJET ---------- */
+function vProject(id) {
+  const g = gl().find(x => x.id === id);
+  if (!g) { setTimeout(() => go('#/g')); return h('div'); }
+  const x = goalCalc('net')[id] || { funded: 0, parts: [] }, e = goalEffort(g, x), done = isGoalDone(g, x);
+  const p = g.target > 0 ? Math.min(1, x.funded / g.target) : 0;
+  const box = h('div', { class: 'n-view', style: '--cc: var(--ch3); --cl: var(--ch3-l);' }, nBack('#/g', 'Mes projets'), nHead(g.type || 'Projet', g.name));
+  box.append(nCard(nKick(done ? 'Objectif atteint ✓' : 'Déjà financé', done ? 'var(--up)' : null), h('div', { class: 'n-big num' }, nE(x.funded)),
+    nSub(`sur ${nE(g.target)} · pour ${fmtGoalDate(e.gd)}${e.n > 0 ? ` (dans ${e.n} mois)` : ''}`),
+    h('div', { class: 'n-bar', style: 'margin-top: 10px;' }, h('i', { style: `width: ${(p * 100).toFixed(1)}%;${done ? ' background: var(--up);' : ''}` }))));
+  if (!done) {
+    const row = (k, v) => h('div', null, h('span', null, k), h('b', { class: 'num' }, v));
+    box.append(nWh('Pour y arriver'));
+    box.append(nCard(h('div', { class: 'n-kv' },
+      row('Reste à trouver', nE(e.rest)),
+      e.planned > 0 ? row('Déjà programmé dans Mon plan', '− ' + nE(Math.min(e.planned, e.rest))) : null,
+      h('div', { class: 'n-eq' }, h('span', null, 'À mettre de côté chaque mois'), h('b', { class: 'num', style: 'color: var(--ch3);' }, e.effort > 0 ? nE(e.effort) : '0 €'))),
+      e.effort > 0 && e.n > 0 ? nSub(`Pendant ${e.n} mois, sur les comptes ci-dessous.`) : null));
+  }
+  box.append(nWh('Les comptes qui le financent', null, `${(g.envs || []).length}`));
+  const parts = x.parts || [];
+  box.append(nTight(...(g.envs || []).map(eid => { const en = S.envs.find(z => z.id === eid); if (!en) return null;
+      const pt = parts.find(z => z.id === eid), amt = pt ? pt.amt : 0, av = Math.max(0, agg(en.lines).v - taxe(en));
+      return nRow({ t: en.name, s: amt >= av - 0.5 ? 'tout le compte' : amt > 0 ? `une partie, sur ${nE(av)}` : 'déjà pris par un projet plus proche', v: nE(amt), onclick: () => go('#/e/' + en.id) }); }).filter(Boolean),
+    !(g.envs || []).length ? nSub('Aucun compte choisi : ce projet ne peut pas encore avancer.') : null));
+  box.append(nWh('Réglages du projet'));
+  box.append(nTight(
+    nRow({ t: 'Modifier', s: 'nom, montant, date, comptes', onclick: () => openGoalModal(g) }),
+    nRow({ t: h('span', { style: 'color: var(--down);' }, 'Supprimer ce projet'), onclick: () => openConfirmModal({ title: 'Supprimer ce projet ?', message: `Supprimer « ${g.name} » ? Vos comptes ne sont pas touchés.`, confirmText: 'Supprimer', confirmStyle: 'btn-danger',
+      onConfirm: () => { S.goals = gl().filter(z => z !== g); save(); toast('Projet supprimé'); go('#/g'); } }) })));
   return box;
 }
 const B_ok = () => getBudget().rev > 0;
@@ -9261,7 +9309,7 @@ function render() {
     'l': () => vLine(r[1], r[2]),
     'n': () => r[1] === 'c' ? vBudgetGroup(r[2]) : vCosts(),
     's': () => r[1] === 'd' ? withTop(nBack('#/s', 'Mon plan'), vStrat()) : vPlan(),
-    'g': () => r[1] === 'd' ? withTop(nBack('#/g', 'Mes projets'), vGoalsR()) : r[1] ? vGoalsR(r[1]) : vProjects(),
+    'g': () => r[1] && r[1] !== 'd' ? vProject(r[1]) : vProjects(),
     'u': vCosts
   };
 
